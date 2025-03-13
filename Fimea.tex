@@ -1,0 +1,327 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#########}
+\hlcom{# Framing Experiment}
+\hlcom{#########}
+\hlkwd{cat}\hldef{(}\hlsng{"\textbackslash{}014"}\hldef{)}
+\end{alltt}
+\end{kframe}\begin{kframe}\begin{alltt}
+\hlkwd{rm}\hldef{(}\hlkwc{list}\hldef{=}\hlkwd{ls}\hldef{())}
+\hlkwd{setwd}\hldef{(}\hlsng{"/Users/hectorbahamonde/research/Fimea/"}\hldef{)}
+
+\hlcom{# Pacman}
+\hlkwa{if} \hldef{(}\hlopt{!}\hlkwd{require}\hldef{(}\hlsng{"pacman"}\hldef{))} \hlkwd{install.packages}\hldef{(}\hlsng{"pacman"}\hldef{);} \hlkwd{library}\hldef{(pacman)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: pacman}}\begin{alltt}
+\hlcom{# loadings}
+\hlkwd{load}\hldef{(}\hlsng{"/Users/hectorbahamonde/research/Fimea/dat.RData"}\hldef{)}
+
+
+\hlcom{# recoding}
+\hlkwd{p_load}\hldef{(dplyr)}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%}
+  \hlkwd{mutate}\hldef{(}\hlkwc{outcome} \hldef{=} \hlkwd{factor}\hldef{(outcome,}
+                          \hlkwc{levels} \hldef{=} \hlkwd{c}\hldef{(}
+                            \hlsng{"The medicine should not be introduced with social funding"}\hldef{,}  \hlcom{# Least supportive (1)}
+                            \hlsng{"A medicine should be introduced at public expense if a company lowers its price"}\hldef{,}  \hlcom{# Middle (2)}
+                            \hlsng{"The medicine should be made available at public expense, regardless of the price charged by the company"}  \hlcom{# Most supportive (3)}
+                          \hldef{),} \hlkwc{ordered} \hldef{=} \hlnum{TRUE}\hldef{))}
+
+\hlcom{# Remove rows}
+\hlkwd{p_load}\hldef{(tidyverse)}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%} \hlkwd{filter}\hldef{(}\hlopt{!}\hlkwd{is.na}\hldef{(outcome))}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%} \hlkwd{filter}\hldef{(Frame} \hlopt{!=} \hlsng{"Frame A"}\hldef{)} \hlopt{%>%} \hlkwd{mutate}\hldef{(}\hlkwc{Frame} \hldef{=} \hlkwd{fct_drop}\hldef{(Frame))}  \hlcom{# Drop unused levels}
+
+\hlcom{# Recode the Frame variable}
+\hldef{dat}\hlopt{$}\hldef{Frame} \hlkwb{<-} \hlkwd{factor}\hldef{(dat}\hlopt{$}\hldef{Frame,}
+                    \hlkwc{levels} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Frame B"}\hldef{,} \hlsng{"Frame C"}\hldef{,} \hlsng{"Frame D"}\hldef{),}  \hlcom{# Questionnaires}
+                    \hlkwc{labels} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Control"}\hldef{,} \hlsng{"Rule of Rescue"}\hldef{,} \hlsng{"Utility Maximizing"}\hldef{))}
+
+\hlcom{# Set "Control" as the reference category}
+\hldef{dat}\hlopt{$}\hldef{Frame} \hlkwb{<-} \hlkwd{relevel}\hldef{(dat}\hlopt{$}\hldef{Frame,} \hlkwc{ref} \hldef{=} \hlsng{"Control"}\hldef{)}
+
+
+\hlcom{# models}
+
+\hlcom{# Fit the ordinal logistic regression model}
+\hlkwd{p_load}\hldef{(MASS)}
+\hldef{model} \hlkwb{<-} \hlkwd{polr}\hldef{(outcome} \hlopt{~} \hldef{Frame} \hlopt{+} \hldef{M1_1} \hlopt{+} \hldef{M1_2_1} \hlopt{+} \hldef{M1_3} \hlopt{+} \hldef{M1_5,} \hlkwc{data} \hldef{= dat,} \hlkwc{Hess} \hldef{=} \hlnum{TRUE}\hldef{)}
+\hlcom{#model <- polr(outcome ~ Frame + M2_1 + M2_2 + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE)}
+\hlcom{#summary(model)}
+
+\hlcom{# Generate predicted probabilities for a predictor}
+\hlkwd{p_load}\hldef{(ggplot2, ggeffects)}
+\hldef{predicted_probs} \hlkwb{<-} \hlkwd{ggpredict}\hldef{(model,} \hlkwc{terms} \hldef{=} \hlsng{"Frame"}\hldef{)}
+
+\hlcom{# plot}
+\hlkwd{p_load}\hldef{(ggplot2)}
+\hlkwd{ggplot}\hldef{(predicted_probs,}
+       \hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= x,} \hlkwc{y} \hldef{= predicted,} \hlkwc{color} \hldef{= response.level))} \hlopt{+}
+  \hlkwd{geom_errorbar}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{ymin} \hldef{= conf.low,} \hlkwc{ymax} \hldef{= conf.high),}
+                \hlkwc{position} \hldef{=} \hlkwd{position_dodge}\hldef{(}\hlkwc{width} \hldef{=} \hlnum{0.5}\hldef{),} \hlkwc{width} \hldef{=} \hlnum{0.3}\hldef{)} \hlopt{+}
+  \hlkwd{theme_minimal}\hldef{()} \hlopt{+}
+  \hlkwd{theme}\hldef{(}
+    \hlkwc{legend.position} \hldef{=} \hlsng{"bottom"}\hldef{,}  \hlcom{# Keep legend at the bottom}
+    \hlkwc{legend.direction} \hldef{=} \hlsng{"vertical"}\hldef{,}  \hlcom{# Stack legend levels vertically}
+    \hlkwc{legend.key.height} \hldef{=} \hlkwd{unit}\hldef{(}\hlnum{0.5}\hldef{,} \hlsng{"cm"}\hldef{)}  \hlcom{# Increase spacing between legend items}
+  \hldef{)} \hlopt{+}
+  \hlkwd{guides}\hldef{(}\hlkwc{colour} \hldef{=} \hlkwd{guide_legend}\hldef{(}\hlkwc{title} \hldef{=} \hlsng{""}\hldef{,} \hlkwc{ncol} \hldef{=} \hlnum{1}\hldef{))} \hlopt{+}
+  \hlkwd{labs}\hldef{(}\hlkwc{x} \hldef{=} \hlsng{"Frame"}\hldef{,} \hlkwc{y} \hldef{=} \hlsng{"Predicted Probabilities"}\hldef{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-1} 
+\begin{kframe}\begin{alltt}
+\hlcom{#########}
+\hlcom{# Decision Making Experiment}
+\hlcom{#########}
+\hlkwd{cat}\hldef{(}\hlsng{"\textbackslash{}014"}\hldef{)}
+\end{alltt}
+\end{kframe}\begin{kframe}\begin{alltt}
+\hlkwd{rm}\hldef{(}\hlkwc{list}\hldef{=}\hlkwd{ls}\hldef{())}
+\hlkwd{setwd}\hldef{(}\hlsng{"/Users/hectorbahamonde/research/Fimea/"}\hldef{)}
+
+\hlcom{# Pacman}
+\hlkwa{if} \hldef{(}\hlopt{!}\hlkwd{require}\hldef{(}\hlsng{"pacman"}\hldef{))} \hlkwd{install.packages}\hldef{(}\hlsng{"pacman"}\hldef{);} \hlkwd{library}\hldef{(pacman)}
+
+\hlcom{# loadings}
+\hlkwd{load}\hldef{(}\hlsng{"/Users/hectorbahamonde/research/Fimea/dat.RData"}\hldef{)}
+
+\hlcom{# From Katri}
+\hlcom{# The hypotheses are broadly that }
+\hlcom{## 1. Framing Exp: framing affects how individuals answer the decision making task.}
+\hlcom{## 2. Dec Mak Exp: having to do the decision making task (vs. not having to do it) affects general opinions and trust. }
+
+\hlcom{# "Frame A" (no dec making task but yes questions) and "Frame B" (yes dec mak task and yes questions)}
+\hlcom{## Right comparison is A (dec mak) vs B (no dec mak)}
+\hlcom{## Can't compare A v B+C+D because C and D do have other framings (rule of resq. and ut. max). THis might bias respondents.}
+
+\hlcom{# keep Frame A and B only}
+\hlkwd{p_load}\hldef{(tidyverse)}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%} \hlkwd{filter}\hldef{(Frame} \hlopt{%in%} \hlkwd{c}\hldef{(}\hlsng{"Frame A"}\hldef{,} \hlsng{"Frame B"}\hldef{))} \hlopt{%>%} \hlkwd{mutate}\hldef{(}\hlkwc{Frame} \hldef{=} \hlkwd{fct_drop}\hldef{(Frame))}  \hlcom{# Drop unused levels}
+
+\hlcom{# re-factoring}
+\hlkwd{p_load}\hldef{(tidyverse)}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%}
+  \hlkwd{filter}\hldef{(Frame} \hlopt{%in%} \hlkwd{c}\hldef{(}\hlsng{"Frame A"}\hldef{,} \hlsng{"Frame B"}\hldef{))} \hlopt{%>%}
+  \hlkwd{mutate}\hldef{(}\hlkwc{Frame} \hldef{=} \hlkwd{recode}\hldef{(Frame,}
+                        \hlsng{"Frame A"} \hldef{=} \hlsng{"Without Task"}\hldef{,}
+                        \hlsng{"Frame B"} \hldef{=} \hlsng{"With Task"}\hldef{),}
+         \hlkwc{Frame} \hldef{=} \hlkwd{factor}\hldef{(Frame,} \hlkwc{levels} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Without Task"}\hldef{,} \hlsng{"With Task"}\hldef{)))} \hlcom{# Convert to factor with reference}
+
+
+\hlcom{# recoding}
+\hldef{dat}\hlopt{$}\hldef{M6_7_1} \hlkwb{<-} \hlkwd{na_if}\hldef{(dat}\hlopt{$}\hldef{M6_7_1,} \hlsng{"I don't know"}\hldef{)}
+\hldef{dat}\hlopt{$}\hldef{M6_7_2} \hlkwb{<-} \hlkwd{na_if}\hldef{(dat}\hlopt{$}\hldef{M6_7_2,} \hlsng{"I don't know"}\hldef{)}
+
+\hlkwd{p_load}\hldef{(dplyr, stringr)}
+
+\hlcom{# M6_7_1}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%}
+  \hlkwd{mutate}\hldef{(}\hlkwc{M6_7_1} \hldef{=} \hlkwd{str_replace}\hldef{(M6_7_1,} \hlsng{"Jokseenkin eri mieltä"}\hldef{,} \hlsng{"Somewhat disagree"}\hldef{)}
+         \hldef{)}
+
+\hlcom{# M6_7_2}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%} \hlkwd{mutate}\hldef{(}\hlkwc{M6_7_2} \hldef{=} \hlkwd{str_replace}\hldef{(M6_7_2,} \hlsng{"Jokseenkin eri mieltä"}\hldef{,} \hlsng{"Somewhat disagree"}\hldef{))}
+\hldef{dat} \hlkwb{<-} \hldef{dat} \hlopt{%>%} \hlkwd{mutate}\hldef{(}\hlkwc{M6_7_2} \hldef{=} \hlkwd{str_replace}\hldef{(M6_7_2,} \hlsng{"Jokseenkin samaa mieltä"}\hldef{,} \hlsng{"Somewhat agree"}\hldef{))}
+
+\hlcom{# re-factor ordered}
+\hldef{dat}\hlopt{$}\hldef{M6_7_1} \hlkwb{<-} \hlkwd{factor}\hldef{(dat}\hlopt{$}\hldef{M6_7_1,}
+                     \hlkwc{levels} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Somewhat disagree"}\hldef{,} \hlsng{"Somewhat agree"}\hldef{,} \hlsng{"Totally disagree"}\hldef{,} \hlsng{"Totally agree"}\hldef{),}
+                     \hlkwc{ordered} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+\hldef{dat}\hlopt{$}\hldef{M6_7_2} \hlkwb{<-} \hlkwd{factor}\hldef{(dat}\hlopt{$}\hldef{M6_7_2,}
+                     \hlkwc{levels} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"Somewhat disagree"}\hldef{,} \hlsng{"Somewhat agree"}\hldef{,} \hlsng{"Totally disagree"}\hldef{,} \hlsng{"Totally agree"}\hldef{),}
+                     \hlkwc{ordered} \hldef{=} \hlnum{TRUE}
+                     \hldef{)}
+
+\hlcom{# to numeric}
+\hldef{dat}\hlopt{$}\hldef{M6_8} \hlkwb{<-} \hlkwd{as.numeric}\hldef{(}\hlkwd{sub}\hldef{(}\hlsng{"^([0-9]+).*"}\hldef{,} \hlsng{"\textbackslash{}\textbackslash{}1"}\hldef{, dat}\hlopt{$}\hldef{M6_8))}
+
+
+\hlcom{# M6_7_1 M6_7_2 M6_8}
+
+\hlcom{# models}
+\hldef{m1.a} \hlkwb{<-} \hlkwd{lm}\hldef{(M6_8} \hlopt{~} \hldef{Frame,} \hlkwc{data} \hldef{= dat)}
+\hldef{m1.b} \hlkwb{<-} \hlkwd{lm}\hldef{(M6_8} \hlopt{~} \hldef{Frame} \hlopt{+} \hldef{M2_1} \hlopt{+} \hldef{M2_2} \hlopt{+} \hldef{M1_1} \hlopt{+} \hldef{M1_2_1} \hlopt{+} \hldef{M1_3} \hlopt{+} \hldef{M1_5,} \hlkwc{data} \hldef{= dat)}
+\hlcom{#summary(m1)}
+
+\hlkwd{p_load}\hldef{(MASS)}
+\hldef{model.1} \hlkwb{<-} \hlkwd{polr}\hldef{(M6_7_1} \hlopt{~} \hldef{Frame} \hlopt{+} \hldef{M1_1} \hlopt{+} \hldef{M1_2_1} \hlopt{+} \hldef{M1_3} \hlopt{+} \hldef{M1_5,} \hlkwc{data} \hldef{= dat,} \hlkwc{Hess} \hldef{=} \hlnum{TRUE}\hldef{)}
+\hldef{model.2} \hlkwb{<-} \hlkwd{polr}\hldef{(M6_7_2} \hlopt{~} \hldef{Frame} \hlopt{+} \hldef{M1_1} \hlopt{+} \hldef{M1_2_1} \hlopt{+} \hldef{M1_3} \hlopt{+} \hldef{M1_5,} \hlkwc{data} \hldef{= dat,} \hlkwc{Hess} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+
+\hlcom{# Generate predicted probabilities for a predictor}
+\hlkwd{p_load}\hldef{(ggplot2, ggeffects)}
+\hldef{predicted_probs.1} \hlkwb{<-} \hlkwd{ggpredict}\hldef{(model.1,} \hlkwc{terms} \hldef{=} \hlsng{"Frame"}\hldef{)}
+\hldef{predicted_probs.2} \hlkwb{<-} \hlkwd{ggpredict}\hldef{(model.2,} \hlkwc{terms} \hldef{=} \hlsng{"Frame"}\hldef{)}
+
+\hlcom{# plot}
+\hlkwd{p_load}\hldef{(ggplot2)}
+\hlkwd{ggplot}\hldef{(predicted_probs.1,}
+       \hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= x,} \hlkwc{y} \hldef{= predicted,} \hlkwc{color} \hldef{= response.level))} \hlopt{+}
+  \hlkwd{geom_errorbar}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{ymin} \hldef{= conf.low,} \hlkwc{ymax} \hldef{= conf.high),}
+                \hlkwc{position} \hldef{=} \hlkwd{position_dodge}\hldef{(}\hlkwc{width} \hldef{=} \hlnum{0.5}\hldef{),} \hlkwc{width} \hldef{=} \hlnum{0.3}\hldef{)} \hlopt{+}
+  \hlkwd{theme_minimal}\hldef{()} \hlopt{+}
+  \hlkwd{theme}\hldef{(}
+    \hlkwc{legend.position} \hldef{=} \hlsng{"bottom"}\hldef{,}  \hlcom{# Keep legend at the bottom}
+    \hlkwc{legend.direction} \hldef{=} \hlsng{"vertical"}\hldef{,}  \hlcom{# Stack legend levels vertically}
+    \hlkwc{legend.key.height} \hldef{=} \hlkwd{unit}\hldef{(}\hlnum{0.5}\hldef{,} \hlsng{"cm"}\hldef{)}  \hlcom{# Increase spacing between legend items}
+  \hldef{)} \hlopt{+}
+  \hlkwd{guides}\hldef{(}\hlkwc{colour} \hldef{=} \hlkwd{guide_legend}\hldef{(}\hlkwc{title} \hldef{=} \hlsng{""}\hldef{,} \hlkwc{ncol} \hldef{=} \hlnum{1}\hldef{))} \hlopt{+}
+  \hlkwd{labs}\hldef{(}\hlkwc{x} \hldef{=} \hlsng{"Frame"}\hldef{,} \hlkwc{y} \hldef{=} \hlsng{"Predicted Probabilities"}\hldef{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-2} 
+\begin{kframe}\begin{alltt}
+\hlcom{# plot}
+\hlkwd{p_load}\hldef{(ggplot2)}
+\hlkwd{ggplot}\hldef{(predicted_probs.2,}
+       \hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= x,} \hlkwc{y} \hldef{= predicted,} \hlkwc{color} \hldef{= response.level))} \hlopt{+}
+  \hlkwd{geom_errorbar}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{ymin} \hldef{= conf.low,} \hlkwc{ymax} \hldef{= conf.high),}
+                \hlkwc{position} \hldef{=} \hlkwd{position_dodge}\hldef{(}\hlkwc{width} \hldef{=} \hlnum{0.5}\hldef{),} \hlkwc{width} \hldef{=} \hlnum{0.3}\hldef{)} \hlopt{+}
+  \hlkwd{theme_minimal}\hldef{()} \hlopt{+}
+  \hlkwd{theme}\hldef{(}
+    \hlkwc{legend.position} \hldef{=} \hlsng{"bottom"}\hldef{,}  \hlcom{# Keep legend at the bottom}
+    \hlkwc{legend.direction} \hldef{=} \hlsng{"vertical"}\hldef{,}  \hlcom{# Stack legend levels vertically}
+    \hlkwc{legend.key.height} \hldef{=} \hlkwd{unit}\hldef{(}\hlnum{0.5}\hldef{,} \hlsng{"cm"}\hldef{)}  \hlcom{# Increase spacing between legend items}
+  \hldef{)} \hlopt{+}
+  \hlkwd{guides}\hldef{(}\hlkwc{colour} \hldef{=} \hlkwd{guide_legend}\hldef{(}\hlkwc{title} \hldef{=} \hlsng{""}\hldef{,} \hlkwc{ncol} \hldef{=} \hlnum{1}\hldef{))} \hlopt{+}
+  \hlkwd{labs}\hldef{(}\hlkwc{x} \hldef{=} \hlsng{"Frame"}\hldef{,} \hlkwc{y} \hldef{=} \hlsng{"Predicted Probabilities"}\hldef{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-3} 
+\end{knitrout}
+
+\begin{kframe}
+\begin{alltt}
+\hlcom{# Load necessary package}
+\hlkwd{p_load}\hldef{(texreg)}
+
+\hlcom{# Use cat() to print LaTeX output correctly}
+\hlkwd{texreg}\hldef{(}\hlkwd{list}\hldef{(m1.a, m1.b),} \hlkwc{booktabs} \hldef{= F,}
+       \hlkwc{omit.coef} \hldef{=} \hlsng{"_2_"}\hldef{,}
+       \hlkwc{scalebox} \hldef{=} \hlnum{0.6}\hldef{)}
+\end{alltt}
+\end{kframe}
+\usepackage{graphicx}
+
+\begin{table}
+\begin{center}
+\scalebox{0.6}{
+\begin{tabular}{l c c}
+\hline
+ & Model 1 & Model 2 \\
+\hline
+(Intercept)                                                                  & $6.28^{***}$ & $7.84^{***}$ \\
+                                                                             & $(0.09)$     & $(1.89)$     \\
+FrameWith Task                                                               & $-0.09$      & $-0.07$      \\
+                                                                             & $(0.14)$     & $(0.15)$     \\
+M2\_1Good for                                                                &              & $1.73^{*}$   \\
+                                                                             &              & $(0.85)$     \\
+M2\_1Moderate                                                                &              & $1.10$       \\
+                                                                             &              & $(0.83)$     \\
+M2\_1Pretty good                                                             &              & $1.33$       \\
+                                                                             &              & $(0.84)$     \\
+M2\_1Quite bad                                                               &              & $0.26$       \\
+                                                                             &              & $(0.88)$     \\
+M2\_2Yes                                                                     &              & $-0.03$      \\
+                                                                             &              & $(0.17)$     \\
+M1\_1Male                                                                    &              & $-0.29^{*}$  \\
+                                                                             &              & $(0.15)$     \\
+M1\_1Other                                                                   &              & $0.30$       \\
+                                                                             &              & $(0.63)$     \\
+M1\_3Separated or divorced                                                   &              & $-0.66^{**}$ \\
+                                                                             &              & $(0.24)$     \\
+M1\_3Unmarried                                                               &              & $-0.02$      \\
+                                                                             &              & $(0.18)$     \\
+M1\_3Widow                                                                   &              & $-0.67$      \\
+                                                                             &              & $(0.38)$     \\
+M1\_5I am on maternity or paternity leave, parental leave or childcare leave &              & $0.26$       \\
+                                                                             &              & $(1.07)$     \\
+M1\_5I am partly working, partly retired                                     &              & $-0.62$      \\
+                                                                             &              & $(0.93)$     \\
+M1\_5I am retired                                                            &              & $-1.14$      \\
+                                                                             &              & $(0.79)$     \\
+M1\_5I am unemployed or laid off                                             &              & $-1.59^{*}$  \\
+                                                                             &              & $(0.80)$     \\
+M1\_5I study                                                                 &              & $-0.94$      \\
+                                                                             &              & $(0.80)$     \\
+M1\_5I work full-time                                                        &              & $-1.08$      \\
+                                                                             &              & $(0.76)$     \\
+M1\_5I work part-time                                                        &              & $-1.05$      \\
+                                                                             &              & $(0.83)$     \\
+M1\_5Something else                                                          &              & $-1.64$      \\
+                                                                             &              & $(0.90)$     \\
+\hline
+R$^2$                                                                        & $0.00$       & $0.12$       \\
+Adj. R$^2$                                                                   & $-0.00$      & $0.04$       \\
+Num. obs.                                                                    & $1040$       & $1040$       \\
+\hline
+\multicolumn{3}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}
+\end{tabular}
+}
+\caption{Statistical models}
+\label{table:coefficients}
+\end{center}
+\end{table}
+
+
+
+\end{document}
