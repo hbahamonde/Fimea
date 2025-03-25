@@ -32,16 +32,52 @@ dat$Frame <- factor(dat$Frame,
                     levels = c("Frame B", "Frame C", "Frame D"),  # Questionnaires
                     labels = c("Control", "Rule of Rescue", "Utility Maximizing"))
 
+# recoding
+dat$M1_10 = as.factor(dat$M1_10) # income
+dat$M1_2_1 = as.numeric(dat$M1_2_1) # Age
+dat$M1_5 = as.factor(dat$M1_5) # Occupation (includes retired)
+dat$M2_1 = as.factor(dat$M2_1) # health status
+dat$M2_2 = as.factor(dat$M2_2) # Illness that affect function to work
+dat$M2_5 = as.factor(dat$M2_5) # Have illness that entitles Kela compensation
+dat$M2_6_0 = as.factor(dat$M2_6_0) # Has a long-term illness 
+dat$M2_11 = as.factor(dat$M2_11) # how much spends on medicine
+dat$PAINOKERROIN = as.numeric(dat$PAINOKERROIN) # weight
+dat$M1_3 = as.factor(dat$M1_3) # marital status 
+
+
 # Set "Control" as the reference category
 dat$Frame <- relevel(dat$Frame, ref = "Control")
 
 
 # models
 
+# “rule of rescue”
+## intuitive obligation to rescue people from death at any cost.
+## Frame 2a: “There is no cure for this particular type of cancer. 
+## The new medicine is a possible option for patients who have already 
+## received multiple treatments and for whom the remaining options are limited”
+
+#  “utility maximizing”
+## rational principle of using resources in the way that they produce the 
+## most health.
+## Frame 2b: “The funds available to healthcare are finite. The adoption 
+## of the new medicine means that the funds used to pay for it will mean 
+## cuts elsewhere in healthcare”
+
 # Fit the ordinal logistic regression model
 p_load(MASS)
-model <- polr(outcome ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE)
-#model <- polr(outcome ~ Frame + M2_1 + M2_2 + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE)
+model <- polr(outcome ~ Frame + 
+                M1_1 + # Gender
+                M1_2_1 + # Age
+                # M1_3 +  # marital status 
+                M2_2 + # Illness that affect function to work
+                # M1_5 + # Occupation (includes retired)
+              M1_10, # income
+              data = dat, 
+              Hess = TRUE,
+              weights = PAINOKERROIN)
+# working model
+# model <- polr(outcome ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE, weights = PAINOKERROIN)
 # summary(model)
 
 # Generate predicted probabilities for a predictor
