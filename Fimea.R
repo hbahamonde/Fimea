@@ -33,6 +33,7 @@ dat$Frame <- factor(dat$Frame,
                     labels = c("Control", "Rule of Rescue", "Utility Maximizing"))
 
 # recoding
+dat$M1_1 = as.factor(dat$M1_1)
 dat$M1_10 = as.factor(dat$M1_10) # income
 dat$M1_2_1 = as.numeric(dat$M1_2_1) # Age
 dat$M1_5 = as.factor(dat$M1_5) # Occupation (includes retired)
@@ -44,6 +45,12 @@ dat$M2_11 = as.factor(dat$M2_11) # how much spends on medicine
 dat$PAINOKERROIN = as.numeric(dat$PAINOKERROIN) # weight
 dat$M1_3 = as.factor(dat$M1_3) # marital status 
 
+# recode income
+dat$income_group <- forcats::fct_collapse(dat$M1_10,
+                                          "Low" = c("Up to 1000 €", "1001-2000 €"),  # use exact output from levels(dat$M1_10)
+                                          "Middle" = c("2001-3000 €", "3001-4000 €"),
+                                          "High" = c("4001-5000 €", "5001-8000 €", "Over 8000"),
+                                          "Other/Unknown" = c("I do not want to answer", "I don't know"))
 
 # Set "Control" as the reference category
 dat$Frame <- relevel(dat$Frame, ref = "Control")
@@ -80,6 +87,14 @@ model <- polr(outcome ~ Frame +
 # model <- polr(outcome ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE, weights = PAINOKERROIN)
 # summary(model)
 
+p_load(texreg)
+
+# Use cat() to print LaTeX output correctly
+screenreg(list(model), 
+          #omit.coef = "_2_",
+       scalebox = 0.1)
+
+
 # Generate predicted probabilities for a predictor
 p_load(ggeffects)
 predicted_probs <- ggpredict(model, terms = "Frame")
@@ -99,6 +114,53 @@ ggplot(predicted_probs,
   guides(colour = guide_legend(title = "", ncol = 1)) + 
   labs(x = "Frame", y = "Predicted Probabilities")
 
+
+
+
+ggplot(predicted_probs, 
+       aes(x = x, y = predicted, colour = response.level)) + 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(width = 0.5), width = 0.3) + 
+  geom_line(position = position_dodge(width = 0.5), aes(group = group)) +
+  geom_point(position = position_dodge(width = 0.5)) +
+  facet_wrap(~response.level) + 
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    legend.key.height = unit(0.5, "cm")
+  ) +
+  #guides(colour = guide_legend(title = "M2_2", ncol = 1)) + 
+  labs(x = "Frame", y = "Predicted Probabilities")
+
+
+# Interaction
+
+model <- polr(outcome ~ Frame * M2_6_0 +
+                income_group +
+                M1_1 + 
+                M1_2_1, 
+              data = dat, 
+              Hess = TRUE,
+              weights = PAINOKERROIN)
+
+predicted_probs <- ggpredict(model, terms = c("Frame", "M2_6_0"))
+
+ggplot(predicted_probs, 
+       aes(x = x, y = predicted, color = group)) + 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(width = 0.5), width = 0.3) + 
+  geom_line(position = position_dodge(width = 0.5), aes(group = group)) +
+  geom_point(position = position_dodge(width = 0.5)) +
+  facet_wrap(~response.level) + 
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    legend.key.height = unit(0.5, "cm")
+  ) +
+  guides(colour = guide_legend(title = "M2_2", ncol = 1)) + 
+  labs(x = "Frame", y = "Predicted Probabilities")
 #########
 # Decision Making Experiment
 #########
