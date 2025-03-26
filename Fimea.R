@@ -37,13 +37,15 @@ dat$M1_1 = as.factor(dat$M1_1)
 dat$M1_10 = as.factor(dat$M1_10) # income
 dat$M1_2_1 = as.numeric(dat$M1_2_1) # Age
 dat$M1_5 = as.factor(dat$M1_5) # Occupation (includes retired)
-dat$M2_1 = as.factor(dat$M2_1) # health status
 dat$M2_2 = as.factor(dat$M2_2) # Illness that affect function to work
 dat$M2_5 = as.factor(dat$M2_5) # Have illness that entitles Kela compensation
 dat$M2_6_0 = as.factor(dat$M2_6_0) # Has a long-term illness 
 dat$M2_11 = as.factor(dat$M2_11) # how much spends on medicine
 dat$PAINOKERROIN = as.numeric(dat$PAINOKERROIN) # weight
 dat$M1_3 = as.factor(dat$M1_3) # marital status 
+dat$M1_9 = as.factor(dat$M1_9) # region
+dat$M2_1 = as.factor(dat$M2_1) # how's your health today
+dat$M2_13 = as.factor(dat$M2_13) # had financial problems to buy medicines last year
 
 # recode income
 dat$income_group <- forcats::fct_collapse(dat$M1_10,
@@ -55,6 +57,35 @@ dat$income_group <- forcats::fct_collapse(dat$M1_10,
 # Set "Control" as the reference category
 dat$Frame <- relevel(dat$Frame, ref = "Control")
 
+# Recode spending on medicine
+dat$M2_11.r <- NA  # initialize new variable
+
+dat$M2_11.r[dat$M2_11 %in% c(
+  "I do not take medicines prescribed by my doctor",
+  "All 100 €"
+)] <- "low"
+
+dat$M2_11.r[dat$M2_11 %in% c(
+  "100-299 €", "300-599 €"
+)] <- "mid"
+
+dat$M2_11.r[dat$M2_11 == "600 € or more"] <- "high"
+
+dat$M2_11.r[dat$M2_11 == "I don't know"] <- NA  # optional, already NA if not matched
+
+dat$M2_11.r = as.factor(dat$M2_11.r)
+
+# recode age
+dat$age_groups <- cut(
+  dat$M1_2_1,
+  breaks = c(17, 34, 59, 79),  # make sure lower bound includes 18
+  labels = c("young", "middle", "old"),
+  right = TRUE,
+  include.lowest = TRUE
+  )
+
+# Ensure it's a factor with ordered levels (optional)
+dat$age_groups <- factor(dat$age_groups, levels = c("young", "middle", "old"))
 
 # models
 
@@ -75,12 +106,19 @@ dat$Frame <- relevel(dat$Frame, ref = "Control")
 p_load(MASS)
 # Ordered Logistic or Probit Regression
 model <- polr(outcome ~ Frame + 
+                # must have
                 M1_1 + # Gender
                 M1_2_1 + # Age
-                # M1_3 +  # marital status 
-                M2_2 + # Illness that affect function to work
-                # M1_5 + # Occupation (includes retired)
-              M1_10, # income
+                income_group + # income
+                # controls
+                M1_9+
+                M2_5 + # Have illness that entitles Kela compensation
+                M2_11  # how much spends on medicine
+              # M2_6_0 + # Has a long-term illness 
+              # M1_3 +  # marital status 
+              #M2_2 + # Illness that affect function to work
+              # M1_5 + # Occupation (includes retired)
+              , 
               data = dat, 
               method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
               Hess = TRUE,
@@ -88,14 +126,6 @@ model <- polr(outcome ~ Frame +
 # working model
 # model <- polr(outcome ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE, weights = PAINOKERROIN)
 # summary(model)
-
-p_load(texreg)
-
-# Use cat() to print LaTeX output correctly
-screenreg(list(model), 
-          #omit.coef = "_2_",
-       scalebox = 0.1)
-
 
 # Generate predicted probabilities for a predictor
 p_load(ggeffects)
@@ -143,23 +173,98 @@ compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
 }
 
 compare_estimates_ci(
-  est1 = 0.29, 
-  ci1 = c(0.24, 0.35), 
-  est2 = 0.37, 
-  ci2 = c(0.30, 0.45)
+  est1 = 0.27, 
+  ci1 = c(0.22, 0.32), 
+  est2 = 0.35, 
+  ci2 = c(0.28, 0.43)
 )
 
 
-# Interaction
-model <- polr(outcome ~ Frame * M2_6_0 +
-                income_group +
-                M1_1 + 
-                M1_2_1, 
+# Models
+
+library(MASS)
+
+build_sequential_models <- function(base_formula, controls, data, outcome_var, weights_var = NULL, method = "logistic") {
+  models <- list()
+  
+  for (i in seq_along(controls)) {
+    control_terms <- paste(controls[1:i], collapse = " + ")
+    full_formula <- as.formula(paste(outcome_var, "~", base_formula, "+", control_terms))
+    
+    model_name <- paste0("m.", i)
+    
+    models[[model_name]] <- polr(
+      formula = full_formula,
+      data = data,
+      method = method,
+      Hess = TRUE,
+      weights = if (!is.null(weights_var)) data[[weights_var]] else NULL
+    )
+  }
+  
+  # Add final model with all controls
+  full_control_terms <- paste(controls, collapse = " + ")
+  full_formula <- as.formula(paste(outcome_var, "~", base_formula, "+", full_control_terms))
+  models[["m.final"]] <- polr(
+    formula = full_formula,
+    data = data,
+    method = method,
+    Hess = TRUE,
+    weights = if (!is.null(weights_var)) data[[weights_var]] else NULL
+  )
+  
+  return(models)
+}
+
+# Required base and control variable definitions
+base_formula <- "Frame + M1_1 + M1_2_1 + M1_10 + 0.32"
+controls <- c("M2_5", "M2_11", "M2_6_0", "M1_3", "M2_2", "M1_5")
+outcome_var <- "outcome"
+
+# Run the function
+models <- build_sequential_models(
+  base_formula = base_formula,
+  controls = controls,
+  data = dat,
+  outcome_var = outcome_var,
+  weights_var = "PAINOKERROIN",
+  method = "logistic"
+)
+
+# table
+p_load(texreg)
+screenreg(models, 
+          #omit.coef = "_2_",
+          scalebox = 0.1)
+
+
+
+
+
+
+
+
+
+
+
+# Interaction (income_group)
+# 1. Framing effects are inelastic to income groups, e.g., both rich and poor react similarly to the frames.
+
+model <- polr(outcome ~ Frame*income_group + 
+                M1_1 + # Gender
+                M1_2_1 + # Age
+                # M2_6_0 + # Has a long-term illness 
+                # M1_3 +  # marital status 
+                M2_2, # Illness that affect function to work
+                # M1_5 + # Occupation (includes retired)
+                #M2_11 + # how much spends on medicine
+                #income_group, # income
               data = dat, 
+              method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
               Hess = TRUE,
               weights = PAINOKERROIN)
 
-predicted_probs <- ggpredict(model, terms = c("Frame", "M2_6_0"))
+predicted_probs <- ggpredict(model, terms = c("Frame", "income_group"))
 
 ggplot(predicted_probs, 
        aes(x = x, y = predicted, color = group)) + 
@@ -174,8 +279,45 @@ ggplot(predicted_probs,
     legend.direction = "vertical",
     legend.key.height = unit(0.5, "cm")
   ) +
-  guides(colour = guide_legend(title = "M2_2", ncol = 1)) + 
+  guides(colour = guide_legend(title = "income_group", ncol = 1)) + 
   labs(x = "Frame", y = "Predicted Probabilities")
+
+# Interaction (M2_13)
+# 1. Framing effects are inelastic to income groups, e.g., both rich and poor react similarly to the frames.
+
+model <- polr(outcome ~ Frame*M2_13 + 
+                M1_1 + # Gender
+                M1_2_1 + # Age
+                # M2_6_0 + # Has a long-term illness 
+                # M1_3 +  # marital status 
+                #M2_2 + # Illness that affect function to work
+              # M1_5 + # Occupation (includes retired)
+              #M2_11 + # how much spends on medicine
+                M2_1, # income
+              data = dat, 
+              method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
+              Hess = TRUE,
+              weights = PAINOKERROIN)
+
+predicted_probs <- ggpredict(model, terms = c("Frame", "M2_13"))
+
+ggplot(predicted_probs, 
+       aes(x = x, y = predicted, color = group)) + 
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
+                position = position_dodge(width = 0.5), width = 0.3) + 
+  geom_line(position = position_dodge(width = 0.5), aes(group = group)) +
+  geom_point(position = position_dodge(width = 0.5)) +
+  facet_wrap(~response.level) + 
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    legend.key.height = unit(0.5, "cm")
+  ) +
+  guides(colour = guide_legend(title = "M2_13", ncol = 1)) + 
+  labs(x = "Frame", y = "Predicted Probabilities")
+
+
 #########
 # Decision Making Experiment
 #########
