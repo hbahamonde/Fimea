@@ -84,8 +84,16 @@ dat$age_groups <- cut(
   include.lowest = TRUE
   )
 
-# Ensure it's a factor with ordered levels (optional)
 dat$age_groups <- factor(dat$age_groups, levels = c("young", "middle", "old"))
+
+# recode problems last year var
+dat$M2_13_binary <- ifelse(
+  dat$M2_13 == "There have been no problems at all",
+  "no_problems",
+  "problems"
+  )
+
+dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems"))
 
 # models
 
