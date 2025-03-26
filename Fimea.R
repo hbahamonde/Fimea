@@ -73,6 +73,7 @@ dat$Frame <- relevel(dat$Frame, ref = "Control")
 
 # Fit the ordinal logistic regression model
 p_load(MASS)
+# Ordered Logistic or Probit Regression
 model <- polr(outcome ~ Frame + 
                 M1_1 + # Gender
                 M1_2_1 + # Age
@@ -81,6 +82,7 @@ model <- polr(outcome ~ Frame +
                 # M1_5 + # Occupation (includes retired)
               M1_10, # income
               data = dat, 
+              method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
               Hess = TRUE,
               weights = PAINOKERROIN)
 # working model
@@ -101,41 +103,54 @@ predicted_probs <- ggpredict(model, terms = "Frame")
 
 # plot
 p_load(ggplot2)
-ggplot(predicted_probs, 
-       aes(x = x, y = predicted, color = response.level)) + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
-                position = position_dodge(width = 0.5), width = 0.3) + 
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",  # Keep legend at the bottom
-    legend.direction = "vertical",  # Stack legend levels vertically
-    legend.key.height = unit(0.5, "cm")  # Increase spacing between legend items
-  ) +
-  guides(colour = guide_legend(title = "", ncol = 1)) + 
-  labs(x = "Frame", y = "Predicted Probabilities")
-
-
-
+dodge <- position_dodge(width = 0.3)
 
 ggplot(predicted_probs, 
-       aes(x = x, y = predicted, colour = response.level)) + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
-                position = position_dodge(width = 0.5), width = 0.3) + 
-  geom_line(position = position_dodge(width = 0.5), aes(group = group)) +
-  geom_point(position = position_dodge(width = 0.5)) +
-  facet_wrap(~response.level) + 
+       aes(x = x, y = predicted, color = response.level, 
+           group = response.level)) + 
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), 
+                  position = dodge) + 
   theme_minimal() +
   theme(
     legend.position = "bottom",
     legend.direction = "vertical",
     legend.key.height = unit(0.5, "cm")
   ) +
-  #guides(colour = guide_legend(title = "M2_2", ncol = 1)) + 
+  guides(colour = guide_legend(title = "", ncol = 1)) + 
   labs(x = "Frame", y = "Predicted Probabilities")
 
 
-# Interaction
+compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
+  # Convert confidence intervals to standard errors
+  z_values <- qnorm(1 - (1 - level) / 2)
+  se1 <- (ci1[2] - ci1[1]) / (2 * qnorm(0.975))  # assumes 95% CI input
+  se2 <- (ci2[2] - ci2[1]) / (2 * qnorm(0.975))
+  
+  diff <- est2 - est1
+  se_diff <- sqrt(se1^2 + se2^2)
+  
+  results <- sapply(z_values, function(z) {
+    z_score <- diff / se_diff
+    is_significant <- abs(z_score) > z
+    p_value <- 2 * (1 - pnorm(abs(z_score)))
+    c(z_score = round(z_score, 3), 
+      p_value = round(p_value, 4), 
+      significant = is_significant)
+  })
+  
+  colnames(results) <- paste0(level * 100, "% CI")
+  return(as.data.frame(t(results)))
+}
 
+compare_estimates_ci(
+  est1 = 0.29, 
+  ci1 = c(0.24, 0.35), 
+  est2 = 0.37, 
+  ci2 = c(0.30, 0.45)
+)
+
+
+# Interaction
 model <- polr(outcome ~ Frame * M2_6_0 +
                 income_group +
                 M1_1 + 
