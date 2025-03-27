@@ -93,21 +93,18 @@
 \hlcom{# Generate the table}
 \hlkwd{texreg}\hldef{(models,}
           \hlcom{#omit.coef = "_2_",}
-          \hlkwc{scalebox} \hldef{=} \hlnum{0.4}\hldef{,}
-          \hlkwc{booktabs} \hldef{=} \hlnum{TRUE}\hldef{,}
-          \hlkwc{use.packages} \hldef{=} \hlnum{TRUE}\hldef{)}
+          \hlkwc{scalebox} \hldef{=} \hlnum{0.3}\hldef{)}
 \end{alltt}
 \end{kframe}
 \usepackage{graphicx}
-\usepackage{booktabs}
 
 \begin{table}
 \begin{center}
-\scalebox{0.4}{
+\scalebox{0.3}{
 \begin{tabular}{l c c c c c c c c c}
-\toprule
+\hline
  & m.0 & m.1 & m.2 & m.3 & m.4 & m.5 & m.6 & m.7 & m.final \\
-\midrule
+\hline
 FrameRule of Rescue                                                                                                                                                                     & $0.37^{***}$  & $0.40^{***}$  & $0.40^{***}$  & $0.39^{***}$  & $0.39^{***}$  & $0.39^{***}$  & $0.39^{***}$  & $0.40^{***}$  & $0.40^{***}$  \\
                                                                                                                                                                                         & $(0.10)$      & $(0.10)$      & $(0.10)$      & $(0.10)$      & $(0.10)$      & $(0.10)$      & $(0.10)$      & $(0.10)$      & $(0.10)$      \\
 FrameUtility Maximizing                                                                                                                                                                 & $-0.29^{**}$  & $-0.27^{**}$  & $-0.26^{**}$  & $-0.27^{**}$  & $-0.27^{**}$  & $-0.27^{**}$  & $-0.27^{**}$  & $-0.23^{*}$   & $-0.23^{*}$   \\
@@ -202,13 +199,13 @@ M1\_5I work part-time                                                           
                                                                                                                                                                                         &               &               &               &               &               &               &               & $(0.42)$      & $(0.42)$      \\
 M1\_5Something else                                                                                                                                                                     &               &               &               &               &               &               &               & $-0.39$       & $-0.39$       \\
                                                                                                                                                                                         &               &               &               &               &               &               &               & $(0.49)$      & $(0.49)$      \\
-\midrule
+\hline
 AIC                                                                                                                                                                                     & $4568.06$     & $4562.76$     & $4564.65$     & $4558.21$     & $4560.16$     & $4552.26$     & $4551.79$     & $4515.31$     & $4515.31$     \\
 BIC                                                                                                                                                                                     & $4631.95$     & $4725.38$     & $4733.08$     & $4755.68$     & $4763.44$     & $4772.96$     & $4778.29$     & $4788.28$     & $4788.28$     \\
 Log Likelihood                                                                                                                                                                          & $-2273.03$    & $-2253.38$    & $-2253.32$    & $-2245.11$    & $-2245.08$    & $-2238.13$    & $-2236.89$    & $-2210.65$    & $-2210.65$    \\
 Deviance                                                                                                                                                                                & $4546.06$     & $4506.76$     & $4506.65$     & $4490.21$     & $4490.16$     & $4476.26$     & $4473.79$     & $4421.31$     & $4421.31$     \\
 Num. obs.                                                                                                                                                                               & $2460$        & $2460$        & $2460$        & $2460$        & $2460$        & $2460$        & $2460$        & $2460$        & $2460$        \\
-\bottomrule
+\hline
 \multicolumn{10}{l}{\scriptsize{$^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$}}
 \end{tabular}
 }
@@ -217,5 +214,48 @@ Num. obs.                                                                       
 \end{center}
 \end{table}
 
+
+\newpage
+
+\subsection{Frames}
+
+Rule of Rescue Frame:
+
+\begin{itemize}
+	\item	Emphasizes the patients' dire situation: last-resort treatment, few options left.
+	\item This is a loss frame: respondents may become risk-seeking and more willing to support the policy.
+	\item Prospect Theory predicts increased support under this framing.
+\end{itemize}
+
+Utility Maximizing Frame:
+
+\begin{itemize}
+	\item	This is closer to a gain or neutral frame — focusing on rational management rather than saving someone from certain death.
+	\item Invokes more risk-averse behavior.
+\end{itemize}
+
+These results are inelastic to the combined effects (interaction term) of the frame presented and the subject's income nor to whether it is difficult to get medicines. 
+	
+
+\subsection{Roadmap}
+
+\begin{enumerate}
+ \item Political Psychology - Framing Effects - Public Policy - Prospect Theory
+ \item Framing a public policy is relevant to gather support in favor of a certain political stance or public policy. They have huge practical consequences.
+ \item Does the public prefer to maximize utilities or minimize losses? This question is fundamental to practitioners and government agencies in presenting and gathering public support for certain policies. With huge practical consequences not only on the said policy but also on budgetary issues and legitimizacy. 
+ \item Traditional approaches predict that "utility-maximizing" approaches should gather more support (efficiency). However, we find that the public rather prefers minimizing losses (than maximizing utilities).
+
+
+
+\end{enumerate}
+
+
+\subsection{Sections of the Paper}
+\begin{enumerate}
+ \item Intro-Motivation: (para) Politics is about who gets what, where and when. Rethorics has been a fundamental aspect of politics (Aristotle). Since resources are scarse and needs are limitless, {\bf (think carefully what the question is)} 'What's an effective way to frame a public policy in welfare state societies'? Other questions: “How do individuals cognitively evaluate public policy trade-offs when exposed to competing rhetorical frames?”, “Does the public react more strongly to frames emphasizing losses or those emphasizing efficiency in the context of public policy?”, “What shapes citizens’ policy preferences when trade-offs are framed in terms of rescue vs. efficiency?”  How do ordinary citizens reason about trade-offs in health policy when exposed to competing frames grounded in loss avoidance versus utility maximization? This question speaks to foundational theories in political psychology and behavioral decision-making.
+ \item Literature on framing and public policy (Mikko/Katri section).
+ \item Our contribution is to introduce prospect theory from a  political psychology perspective to the literature on framing effects and public policy. 
+ \item Methods; experimental design.
+\end{enumerate}
 
 \end{document}

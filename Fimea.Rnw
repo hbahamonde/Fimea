@@ -99,6 +99,10 @@ dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems
 
 # models
 
+# Question
+## “The benefits and costs of one new cancer drug are described below. Read the description and then answer the question. The new treatment is for a specific type of incurable cancer. In Finland, there are 10–20 patients each year for whom a new drug can be used.”
+
+
 # “rule of rescue”
 ## intuitive obligation to rescue people from death at any cost.
 ## Frame 2a: “There is no cure for this particular type of cancer. 
@@ -141,6 +145,10 @@ predicted_probs <- ggpredict(model, terms = "Frame")
 p_load(ggplot2)
 dodge <- position_dodge(width = 0.3)
 
+# Frame descriptions
+note_rule <- "Rule of Rescue:\nThere is no cure for this particular type of cancer. The new medicine is a possible option\n for patients who have already received multiple treatments and for whom the\nremaining options are limited."
+note_utility <- "Utility Maximizing:\nThe funds available to healthcare are finite. The adoption of the new medicine means\nthat the funds used to pay for it will mean cuts elsewhere in healthcare."
+
 ggplot(predicted_probs, 
        aes(x = x, y = predicted, color = response.level, 
            group = response.level)) + 
@@ -153,7 +161,15 @@ ggplot(predicted_probs,
     legend.key.height = unit(0.5, "cm")
   ) +
   guides(colour = guide_legend(title = "", ncol = 1)) + 
-  labs(x = "Frame", y = "Predicted Probabilities")
+  labs(
+    title = "The new treatment is for a specific type of incurable cancer.\nIn Finland, there are 10–20 patients each year for\nwhom a new drug can be used.",
+    x = "Frame",
+    y = "Predicted Probabilities",
+    caption = paste0(note_rule, "\n\n", note_utility)
+  )
+
+
+
 
 
 compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
@@ -334,9 +350,50 @@ all_models <- c(list(model), models)
 # Generate the table
 texreg(models, 
           #omit.coef = "_2_",
-          scalebox = 0.3,
-          booktabs = TRUE, 
-          use.packages = TRUE)
+          scalebox = 0.3)
 @
+
+\newpage
+
+\subsection{Frames}
+
+Rule of Rescue Frame:
+
+\begin{itemize}
+	\item	Emphasizes the patients' dire situation: last-resort treatment, few options left.
+	\item This is a loss frame: respondents may become risk-seeking and more willing to support the policy.
+	\item Prospect Theory predicts increased support under this framing.
+\end{itemize}
+
+Utility Maximizing Frame:
+
+\begin{itemize}
+	\item	This is closer to a gain or neutral frame — focusing on rational management rather than saving someone from certain death.
+	\item Invokes more risk-averse behavior.
+\end{itemize}
+
+These results are inelastic to the combined effects (interaction term) of the frame presented and the subject's income nor to whether it is difficult to get medicines. 
+	
+
+\subsection{Roadmap}
+
+\begin{enumerate}
+ \item Political Psychology - Framing Effects - Public Policy - Prospect Theory
+ \item Framing a public policy is relevant to gather support in favor of a certain political stance or public policy. They have huge practical consequences.
+ \item Does the public prefer to maximize utilities or minimize losses? This question is fundamental to practitioners and government agencies in presenting and gathering public support for certain policies. With huge practical consequences not only on the said policy but also on budgetary issues and legitimizacy. 
+ \item Traditional approaches predict that "utility-maximizing" approaches should gather more support (efficiency). However, we find that the public rather prefers minimizing losses (than maximizing utilities).
+
+
+
+\end{enumerate}
+
+
+\subsection{Sections of the Paper}
+\begin{enumerate}
+ \item Intro-Motivation: (para) Politics is about who gets what, where and when. Rethorics has been a fundamental aspect of politics (Aristotle). Since resources are scarse and needs are limitless, {\bf (think carefully what the question is)} 'What's an effective way to frame a public policy in welfare state societies'? Other questions: “How do individuals cognitively evaluate public policy trade-offs when exposed to competing rhetorical frames?”, “Does the public react more strongly to frames emphasizing losses or those emphasizing efficiency in the context of public policy?”, “What shapes citizens’ policy preferences when trade-offs are framed in terms of rescue vs. efficiency?”  How do ordinary citizens reason about trade-offs in health policy when exposed to competing frames grounded in loss avoidance versus utility maximization? This question speaks to foundational theories in political psychology and behavioral decision-making.
+ \item Literature on framing and public policy (Mikko/Katri section).
+ \item Our contribution is to introduce prospect theory from a  political psychology perspective to the literature on framing effects and public policy. 
+ \item Methods; experimental design.
+\end{enumerate}
 
 \end{document}
