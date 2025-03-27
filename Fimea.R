@@ -243,7 +243,9 @@ models <- build_sequential_models(
 p_load(texreg)
 screenreg(models, 
           #omit.coef = "_2_",
-          scalebox = 0.1)
+          scalebox = 0.1,
+          booktabs = TRUE, 
+          use.packages = TRUE)
 
 
 
