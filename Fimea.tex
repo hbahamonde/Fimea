@@ -56,7 +56,7 @@
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: pacman}}\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-1} 
+\includegraphics[width=\maxwidth]{figure/loading-1} 
 \begin{kframe}\begin{verbatim}
 ##        z_score p_value significant
 ## 90% CI   1.786  0.0742           1
@@ -77,9 +77,9 @@
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting m.6: outcome \textasciitilde{} Frame + M1\_1 + M1\_2\_1 + income\_group + M1\_9 + M2\_5 + M2\_11 + M2\_6\_0 + M1\_3 + M2\_2}}
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# Fitting m.7: outcome \textasciitilde{} Frame + M1\_1 + M1\_2\_1 + income\_group + M1\_9 + M2\_5 + M2\_11 + M2\_6\_0 + M1\_3 + M2\_2 + M1\_5}}\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-2} 
+\includegraphics[width=\maxwidth]{figure/loading-2} 
 
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-3} 
+\includegraphics[width=\maxwidth]{figure/loading-3} 
 \end{knitrout}
 
 
@@ -93,7 +93,8 @@
 \hlcom{# Generate the table}
 \hlkwd{texreg}\hldef{(models,}
           \hlcom{#omit.coef = "_2_",}
-          \hlkwc{scalebox} \hldef{=} \hlnum{0.3}\hldef{)}
+          \hlkwc{scalebox} \hldef{=} \hlnum{0.3}
+       \hldef{)}
 \end{alltt}
 \end{kframe}
 \usepackage{graphicx}
@@ -215,35 +216,39 @@ Num. obs.                                                                       
 \end{table}
 
 
-\newpage
 
-\subsection{Frames}
-
-Rule of Rescue Frame:
+\subsection{Prospect Theory (Kahneman \& Tversky) predicts that}
 
 \begin{itemize}
-	\item	Emphasizes the patients' dire situation: last-resort treatment, few options left.
-	\item This is a loss frame: respondents may become risk-seeking and more willing to support the policy.
-	\item Prospect Theory predicts increased support under this framing.
+\item Loss frames lead to risk-seeking behavior.
+\item Gain/neutral frames lead to risk-averse behavior.
 \end{itemize}
 
-Utility Maximizing Frame:
+\subsection{Rule of Rescue Frame = Loss Frame}
+
+This frame makes the problem urgent and personal (last-resort cancer drug). According to Prospect Theory:
 
 \begin{itemize}
-	\item	This is closer to a gain or neutral frame — focusing on rational management rather than saving someone from certain death.
-	\item Invokes more risk-averse behavior.
+\item People become risk-seeking → more support for the high-cost/high-reward options (i.e., "The medicine should be made available at public expense, regardless of the price charged by the company").
+\item In the graph: Green bar increases compared to Control and Utility Maximizing frames. In other words, when exposed to "Rule of Rescue" (loss) more respondents turn to risk-seeking behavior, leading to supporting unconditional public funding, even without a price cut.
 \end{itemize}
 
-These results are inelastic to the combined effects (interaction term) of the frame presented and the subject's income nor to whether it is difficult to get medicines. 
-	
+\subsection{Utility Maximizing Frame = Gain Frame}
+
+This is a cost-efficiency frame: resources are diverted to other ends. According to Prospect Theory:
+
+\begin{itemize}
+\item People become risk-averse: prefer lower-cost or no-risk options. Thus, limitless option (green bar) goes down compared to control (but change is non-significant).
+\item Blue bar (no funding option) goes up: fewer support for unconditional adoption (risky). This is barely significant, however.
+\end{itemize}
 
 \subsection{Roadmap}
 
 \begin{enumerate}
  \item Political Psychology - Framing Effects - Public Policy - Prospect Theory
  \item Framing a public policy is relevant to gather support in favor of a certain political stance or public policy. They have huge practical consequences.
- \item Does the public prefer to maximize utilities or minimize losses? This question is fundamental to practitioners and government agencies in presenting and gathering public support for certain policies. With huge practical consequences not only on the said policy but also on budgetary issues and legitimizacy. 
- \item Traditional approaches predict that "utility-maximizing" approaches should gather more support (efficiency). However, we find that the public rather prefers minimizing losses (than maximizing utilities).
+ \item Does the public prefer to maximize utilities or minimize losses? This question is fundamental to practitioners and government agencies in presenting and gathering public support for certain policies. With huge practical consequences not only on the said policy but also on budgetary issues and legitimacy. 
+ \item Traditional approaches predict that "utility-maximizing" approaches should gather more support (efficiency). However, we find that the public rather prefers minimizing losses (than maximizing utilities). (I can write a small section on this difference).
 
 
 
@@ -252,10 +257,12 @@ These results are inelastic to the combined effects (interaction term) of the fr
 
 \subsection{Sections of the Paper}
 \begin{enumerate}
- \item Intro-Motivation: (para) Politics is about who gets what, where and when. Rethorics has been a fundamental aspect of politics (Aristotle). Since resources are scarse and needs are limitless, {\bf (think carefully what the question is)} 'What's an effective way to frame a public policy in welfare state societies'? Other questions: “How do individuals cognitively evaluate public policy trade-offs when exposed to competing rhetorical frames?”, “Does the public react more strongly to frames emphasizing losses or those emphasizing efficiency in the context of public policy?”, “What shapes citizens’ policy preferences when trade-offs are framed in terms of rescue vs. efficiency?”  How do ordinary citizens reason about trade-offs in health policy when exposed to competing frames grounded in loss avoidance versus utility maximization? This question speaks to foundational theories in political psychology and behavioral decision-making.
+ \item Intro-Motivation: Politics is about who gets what, where and when. Rethoric has been a fundamental aspect of politics (Aristotle). Since resources are scarce and needs are limitless, {\bf (think carefully what the question is)} 'What's an effective way to frame a public policy in welfare state societies'? Other questions: “How do individuals cognitively evaluate public policy trade-offs when exposed to competing rhetorical frames?”, “Does the public react more strongly to frames emphasizing losses or those emphasizing efficiency in the context of public policy?”, “What shapes citizens’ policy preferences when trade-offs are framed in terms of rescue vs. efficiency?”  How do ordinary citizens reason about trade-offs in health policy when exposed to competing frames grounded in loss avoidance versus utility maximization? This question speaks to foundational theories in political psychology and behavioral decision-making.
  \item Literature on framing and public policy (Mikko/Katri section).
- \item Our contribution is to introduce prospect theory from a  political psychology perspective to the literature on framing effects and public policy. 
- \item Methods; experimental design.
+ \item Our contribution is to introduce prospect theory from a  political psychology perspective to the literature on framing effects and public policy. (I can write the prospect theory part). {\bf Tactical aspects}: I would exploit prospect theory, but maybe without saying "prospect theory." Thus, the contribution is really about shifting the focus to a framework of gains, to a framework of minimizing losses. I.e., I'd like to use the prospect theory apparatus and language, but for tactical reasons, maybe not say this IS a paper ABOUT prospect theory.
+ \item Methods; experimental design. (I can write this. Maybe you guys can describe the procedures first? And then I write the econometric analyses and interpretation in light of of the losses theory we're proposing? Maybe good idea there is a link of our results in light of the public policy research too, which I don't know---like, how our results complement or not with the rest of the pub pol literature/findings).
 \end{enumerate}
 
 \end{document}
+
+
