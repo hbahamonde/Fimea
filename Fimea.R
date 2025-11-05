@@ -1,6 +1,9 @@
 #########
 # Framing Experiment
 #########
+
+
+## ---- loadings
 cat("\014")
 rm(list=ls())
 setwd("/Users/hectorbahamonde/research/Fimea/")
@@ -94,6 +97,8 @@ dat$M2_13_binary <- ifelse(
   )
 
 dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems"))
+## ---- 
+
 
 # models
 
@@ -420,3 +425,23 @@ ggplot(predicted_probs,
   ) +
   guides(colour = guide_legend(title = "", ncol = 1)) + 
   labs(x = "Frame", y = "Predicted Probabilities")
+
+
+
+################
+#### ABSTRACT
+################
+
+## ---- abstract ----
+fileConn <- file ("abstract.txt")
+abstract.c = as.character(c("Abstract here."))
+writeLines(abstract.c, fileConn)
+close(fileConn)
+## ----
+
+
+
+
+## ---- abstract.length ----
+abstract.c.l = sapply(strsplit(abstract.c, " "), length)
+## ----

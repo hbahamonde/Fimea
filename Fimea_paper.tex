@@ -1,0 +1,322 @@
+% !Rnw weave = knitr
+% !TeX program = pdflatex
+
+%========================
+% paper.tex
+%========================
+\documentclass[11pt]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+%---- Page & fonts
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{2013}{--}   % en dash
+\DeclareUnicodeCharacter{2014}{---}  % em dash
+\DeclareUnicodeCharacter{2212}{-}    % unicode minus
+\usepackage{lmodern}
+\usepackage[american]{babel}
+\usepackage{microtype}
+\usepackage{authblk}
+
+%---- Math & symbols
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{bbm}          % for \mathbbm{1} indicator
+\usepackage{siunitx}
+\usepackage{dcolumn}   % needed for stargazer's D{.}{.}{-3} columns
+\usepackage{csquotes}  % recommended with biblatex (silences that warning)
+
+%---- Graphics, tables, floats
+\usepackage{graphicx}
+\graphicspath{{fig/}{figures/}{build/}} % adjust as needed
+\usepackage{booktabs, threeparttable}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+
+%---- % Allows abstract customization
+\usepackage{abstract} 
+\renewcommand{\abstractnamefont}{\normalfont\bfseries} % Set the "Abstract" text to bold
+%\renewcommand{\abstracttextfont}{\normalfont\small\itshape} % Set the abstract itself to small italic text
+
+
+
+%---- Links & clever refs
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%---- Citations & bib
+\usepackage[backend=biber,style=authoryear,dashed=false,doi=false,isbn=false,url=false,arxiv=false]{biblatex}
+\addbibresource{/Users/hectorbahamonde/Bibliografia_PoliSci/library.bib}  % your .bib file
+
+
+%---- Custom macros (edit as you like)
+\newcommand{\govdist}{\texttt{Government distance}}
+\newcommand{\govclose}{\texttt{gov\_closeness\_w\_01}}
+\newcommand{\techno}{\texttt{Technocracy}}
+\newcommand{\demsat}{\texttt{Q8\_1}}      % democratic satisfaction
+\newcommand{\trustpol}{\texttt{Q9\_4}}    % trust in Finnish politicians
+\newcommand{\ind}[1]{\mathbbm{1}\!\left\{#1\right\}}
+
+%\title{Losers, Delegation, and the Ideological Valence of Expertise: Evidence from Finland}
+\vspace{-1cm}\title{\textbf{\input{title.txt}\unskip}} % Article title
+
+
+
+
+
+\author[1]{\textsc{Katri Aaltonen}\thanks{\href{mailto:katri.m.aaltonen@utu.fi}{katri.m.aaltonen@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/katri-aaltonen}{\texttt{https://www.utu.fi/fi/ihmiset/katri-aaltonen}}}}
+\author[2]{\textsc{Hector Bahamonde}\thanks{\href{mailto:hector.bahamonde@utu.fi}{hector.bahamonde@utu.fi}; \href{https://www.hectorbahamonde.com}{\texttt{https://www.hectorbahamonde.com}}}}
+\author[3]{\textsc{Mikko Niemelä}\thanks{\href{mailto:mikko.niemela@utu.fi}{mikko.niemela@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/mikko-niemela}{\texttt{https://www.utu.fi/fi/ihmiset/mikko-niemela}}. \\{\bf Authors are listed in alphabetical order; all authors contributed equally.}}}
+
+
+\affil[1]{Academy Research Fellow, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[2]{Senior Researcher, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[3]{Professor of Sociology, INVEST Research Flagship Centre, University of Turku, Finland}
+
+%\affil[ ]{\textit{Authors are listed in alphabetical order; all authors contributed equally.}}
+
+
+
+
+\date{\today}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+\maketitle
+\thispagestyle{empty}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%\newpage
+\vspace{-1cm}
+\begin{abstract}
+\input{abstract.txt}\unskip
+\end{abstract}
+
+
+
+\vspace*{0.3cm}
+\centerline{{\bf Abstract length}: 2 words.}
+\vspace*{0.3cm}
+
+
+
+%\centerline{\bf Please consider downloading the last version of the paper \href{https://raw.githubusercontent.com/hbahamonde/democratic_backsliding/main/2025/Dem_Backsliding_2.pdf}{\texttt{{\color{red}here}}}.}
+
+\vspace*{0.3cm}
+\centerline{\bf {\color{red}PLEASE DO NOT CIRCULATE}.}
+
+\vspace*{0.5cm}
+\centerline{\providecommand{\keywords}[1]{\textbf{\textit{Keywords---}} #1} % keywords.  
+\keywords{{\input{keywords.txt}\unskip}}}
+
+
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\section{Intro}
+
+
+
+
+\FloatBarrier
+\newpage
+
+
+
+\clearpage
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\printbibliography
+\clearpage
+\newpage
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WORD COUNT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+
+
+
+\begin{center}
+\vspace*{\stretch{1}}
+\dotfill
+\dotfill {\huge {\bf Word count}: 46} \dotfill
+\dotfill
+\vspace*{\stretch{1}}
+\end{center}
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WORD COUNT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Online Appendix
+%\newpage
+%\section{Online Appendix}
+%\pagenumbering{Roman}
+%\setcounter{page}{1}
+
+
+
+%% reset tables and figures counter
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+
+
+
+\section{Appendix}
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+
+\subsection{Regression Models}
+\FloatBarrier
+
+Here.
+
+\end{document}
+
+
+TODO
+
+######### OUTLETS
+
+Political Behavior 
+
+9,000 words or fewer
+
+https://link.springer.com/collections/ebebbjjcij (Populism special issue)
+
+Submission to first decision (median): 10 days
+
+appears to be the best fit overall. Its scope squarely covers voter perceptions of democratic norms and partisan polarization, which are central to the manuscript. The fact that Political Behavior has recently published work on electoral losers’ reactions and democratic erosion underscores this alignment ￼ ￼.
+
+https://link.springer.com/article/10.1007/s11109-025-10001-1#:~:text=While%20%E2%80%98losers%E2%80%99%20consent%E2%80%99%20has%20long,may%20initially%20overlook%20undemocratic%20behavior
+
+https://link.springer.com/article/10.1007/s11109-025-10063-1#:~:text=Conspiracism%20is%20also%20positively%20associated,level%20conspiracism
+
+Make sure these are included.
+
+Others: European Journal of Political Research (EJPR)
+
+
+######### include biblio
+
+Evidence of Mixed Perceptions: Survey evidence suggests that partisan leanings color institutional trust in Finland. We’ve already noted that supporters of the populist right tend to distrust expert bodies like THL ￼.
+
+https://www.researchgate.net/publication/338520366_Political_trust_political_party_preference_and_trust_in_knowledge-based_institutions#:~:text=,19%20context%20%5B22%5D.
+
+
+######## Include this in the results and discussion section
+
+While we don’t yet have direct survey data in our study asking “Do you think the experts are ideologically biased?”, the observed behavior (lower delegation support by opposition voters) implies that enough people perceive an alignment to make a difference. The effect wouldn’t be so clear-cut if virtually everyone saw the experts as perfectly neutral. Thus, the working assumption that many voters see experts as aligned with the current government (even in Finland) is at least partially validated by the patterns in our data.
+
+Not all Finnish voters see experts as politicized – but enough do to matter. In a high-trust context, many people still view experts as neutral. However, it’s not universal. Some voters (often influenced by party rhetoric or policy conflicts) do question expert neutrality when a particular government is in charge. We aren’t assuming every voter believes experts are right-wing shills now – rather, we argue that the perception of bias is present among a significant segment (primarily those ideologically distant from the right-wing government). That perception, where it exists, is what drives down support for technocratic delegation in those groups. So you’re correct: it’s not a blanket assumption applicable to everyone, but it’s a dynamic that enough people partake in to produce the observed effect.
+
+
+#########
+
+This pattern is not just theoretical – analogous dynamics have been observed elsewhere. For example, a recent U.S. study on the Federal Reserve (an expert, non-elected institution) found that people’s trust in the Fed hinges on whether they perceive it as politically biased. When asked which party the Fed favors, a majority of Democrats thought the Fed leaned Republican and vice versa. Crucially, if the Fed is seen as aligned with the opposing party, those voters’ trust drops significantly ￼. In a scenario where a right-wing president is elected, trust among left-leaning citizens was predicted to decline sharply (while rising among right-leaning citizens) despite overall high confidence in the institution ￼. This illustrates the general mechanism: perceived political alignment of experts leads to partisan divergence in support.
+
+https://bfi.uchicago.edu/insights/perceived-political-bias-of-the-federal-reserve/#:~:text=would%20view%20the%20Fed%20less,leaning%20consumers
+
+######
+
+Finland consistently ranks among the countries with the greatest public confidence in governance and expertise ￼
+
+https://valtioneuvosto.fi/en/-/10623/oecd-trust-survey-provides-recommendations-for-finland-on-action-to-reinforce-people-s-trust-in-government-and-public-institutions#:~:text=In%20Finland%20there%20is%20a,may%20weaken%20social%20cohesion%20and
+
+Roughly two-thirds of Finns trust central government and civil service, and a solid majority trust the government in power ￼.
+
+https://valtioneuvosto.fi/en/-/10623/oecd-trust-survey-provides-recommendations-for-finland-on-action-to-reinforce-people-s-trust-in-government-and-public-institutions#:~:text=In%20Finland%20there%20is%20a,may%20weaken%20social%20cohesion%20and
+
+By choosing Finland, the paper is essentially testing the limits of the theory. In a country where baseline trust is high, one might expect technocratic delegation to be broadly accepted across the political spectrum. Finland’s context sets a high bar: if even here we observe that people’s support for expert decision-making varies by how close they are to the government’s ideology, it strongly supports the argument. In other words, Finland serves as a crucial test – a context most likely to yield no partisan bias (due to high general trust), yet the findings indicate otherwise.
+
+
+The puzzle, then, is: If Finns trust experts so much, why do we still find ideological differences in support for technocratic delegation? Several factors help reconcile this:
+
+
+  • High Trust is General, But Not Uniform: Finland’s high trust is an average; it masks variation among groups. Indeed, surveys show significant differences in trust across demographics and political camps ￼. For example, rural, lower-education, and lower-income Finns report markedly less trust in institutions than urban, highly educated citizens ￼. These demographics overlap heavily with certain partisan groups. In Finnish politics, the populist right (Finns Party) has a strong base among those lower-trust demographics – and correspondingly, their supporters tend to be more skeptical of experts and officials. Research during the pandemic found that simply intending to vote for the Finns Party was a significant predictor of distrust in the national health authority (THL) ￼. This aligns with reports that Finns Party supporters are often more sceptical of science and experts ￼. In short, not everyone in a high-trust society trusts experts equally – opposition or anti-establishment voters may harbor more doubt, which creates room for the observed effect.
+
+
+  • Context-Specific Trust vs. Abstract Trust: It’s possible to trust “experts in general” but question specific experts in a given context. Finns might agree that, say, scientists and civil servants are credible overall, yet still hesitate to empower a particular set of experts if they think those experts are influenced by politics. Technocratic delegation (handing decision power to experts) is a more politically charged proposition than simply expressing trust in expertise. When faced with a concrete scenario – e.g. letting an “independent commission” set policy – voters may scrutinize who these experts are and who appointed them. If a person dislikes the current right-wing government, they might worry that any commission of experts formed under that government’s watch will mirror its biases. Thus, high diffuse trust can be overridden by situational suspicions when delegation of power is on the table.
+
+
+  • Perceived Alignment Triggers Partisan Lens: Even in Finland, there can be a perception that expert bodies are not entirely neutral but lean in the direction of the incumbent government’s ideology. This perception may be subtle, but it is enough to activate a partisan response. Recall that in the U.S. Fed example, overall trust in the institution stayed high, yet each side believed the institution favored the other side ￼ ￼. A similar dynamic can occur in Finland: voters across the spectrum might profess trust in, say, the civil service or scientific community, yet each camp may think those institutions serve someone else’s agenda in practice. If left-wing Finns suspect that expert agencies are quietly pushing the right-wing government’s policies (or if right-wing voters suspect experts are captive to a left-leaning “deep state”), each will be less eager to cede authority to those experts. In sum, high average trust doesn’t preclude partisan interpretations of expert impartiality.

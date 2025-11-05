@@ -1,0 +1,257 @@
+% !Rnw weave = knitr
+% !TeX program = pdflatex
+
+%========================
+% paper.tex
+%========================
+\documentclass[11pt]{article}
+
+%---- Page & fonts
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{2013}{--}   % en dash
+\DeclareUnicodeCharacter{2014}{---}  % em dash
+\DeclareUnicodeCharacter{2212}{-}    % unicode minus
+\usepackage{lmodern}
+\usepackage[american]{babel}
+\usepackage{microtype}
+\usepackage{authblk}
+
+%---- Math & symbols
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{bbm}          % for \mathbbm{1} indicator
+\usepackage{siunitx}
+\usepackage{dcolumn}   % needed for stargazer's D{.}{.}{-3} columns
+\usepackage{csquotes}  % recommended with biblatex (silences that warning)
+
+%---- Graphics, tables, floats
+\usepackage{graphicx}
+\graphicspath{{fig/}{figures/}{build/}} % adjust as needed
+\usepackage{booktabs, threeparttable}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+
+%---- % Allows abstract customization
+\usepackage{abstract} 
+\renewcommand{\abstractnamefont}{\normalfont\bfseries} % Set the "Abstract" text to bold
+%\renewcommand{\abstracttextfont}{\normalfont\small\itshape} % Set the abstract itself to small italic text
+
+
+
+%---- Links & clever refs
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%---- Citations & bib
+\usepackage[backend=biber,style=authoryear,dashed=false,doi=false,isbn=false,url=false,arxiv=false]{biblatex}
+\addbibresource{/Users/hectorbahamonde/Bibliografia_PoliSci/library.bib}  % your .bib file
+
+
+%---- Custom macros (edit as you like)
+\newcommand{\govdist}{\texttt{Government distance}}
+\newcommand{\govclose}{\texttt{gov\_closeness\_w\_01}}
+\newcommand{\techno}{\texttt{Technocracy}}
+\newcommand{\demsat}{\texttt{Q8\_1}}      % democratic satisfaction
+\newcommand{\trustpol}{\texttt{Q9\_4}}    % trust in Finnish politicians
+\newcommand{\ind}[1]{\mathbbm{1}\!\left\{#1\right\}}
+
+%\title{Losers, Delegation, and the Ideological Valence of Expertise: Evidence from Finland}
+\vspace{-1cm}\title{\textbf{\input{title.txt}\unskip}} % Article title
+
+
+
+
+
+\author[1]{\textsc{Katri Aaltonen}\thanks{\href{mailto:katri.m.aaltonen@utu.fi}{katri.m.aaltonen@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/katri-aaltonen}{\texttt{https://www.utu.fi/fi/ihmiset/katri-aaltonen}}}}
+\author[2]{\textsc{Hector Bahamonde}\thanks{\href{mailto:hector.bahamonde@utu.fi}{hector.bahamonde@utu.fi}; \href{https://www.hectorbahamonde.com}{\texttt{https://www.hectorbahamonde.com}}}}
+\author[3]{\textsc{Mikko Niemelä}\thanks{\href{mailto:mikko.niemela@utu.fi}{mikko.niemela@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/mikko-niemela}{\texttt{https://www.utu.fi/fi/ihmiset/mikko-niemela}}. \\{\bf Authors are listed in alphabetical order; all authors contributed equally.}}}
+
+
+\affil[1]{Academy Research Fellow, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[2]{Senior Researcher, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[3]{Professor of Sociology, INVEST Research Flagship Centre, University of Turku, Finland}
+
+%\affil[ ]{\textit{Authors are listed in alphabetical order; all authors contributed equally.}}
+
+
+
+
+\date{\today}
+
+\begin{document}
+
+
+\maketitle
+\thispagestyle{empty}
+
+
+
+<<setup, include=FALSE>>=
+# Fail fast if knitr is missing; install it once *outside* the .Rnw
+if (!requireNamespace("knitr", quietly = TRUE)) {
+  stop("Please install knitr once before compiling: install.packages('knitr')")
+}
+knitr::opts_chunk$set(
+  echo = FALSE, message = FALSE, warning = FALSE,
+  fig.align = "center", fig.width = 6, fig.height = 4,
+  cache = FALSE
+)
+options(scipen = 999)  # large enough; avoids overflows or odd behavior
+@
+
+
+
+<<echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE>>=
+knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
+@
+
+<<loadings, include=FALSE, cache=FALSE, eval=TRUE, error=FALSE, results='hide', ref.label='loadings'>>=
+@
+
+
+<<abstract, echo=FALSE, comment=NA, warning=FALSE, message=FALSE, include = FALSE, cache=FALSE, eval=TRUE>>=
+
+@
+
+<<abstract.length, echo=FALSE, comment=NA, warning=FALSE, message=FALSE, include = FALSE, cache=FALSE, eval=TRUE>>=
+
+@
+
+
+
+%\newpage
+\vspace{-1cm}
+\begin{abstract}
+\input{abstract.txt}\unskip
+\end{abstract}
+
+
+
+\vspace*{0.3cm}
+\centerline{{\bf Abstract length}: \Sexpr{abstract.c.l} words.}
+\vspace*{0.3cm}
+
+
+
+%\centerline{\bf Please consider downloading the last version of the paper \href{https://raw.githubusercontent.com/hbahamonde/democratic_backsliding/main/2025/Dem_Backsliding_2.pdf}{\texttt{{\color{red}here}}}.}
+
+\vspace*{0.3cm}
+\centerline{\bf {\color{red}PLEASE DO NOT CIRCULATE}.}
+
+\vspace*{0.5cm}
+\centerline{\providecommand{\keywords}[1]{\textbf{\textit{Keywords---}} #1} % keywords.  
+\keywords{{\input{keywords.txt}\unskip}}}
+
+
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\section{Public Support for Healthcare Policies: Is the glass half-full or half-empty?}
+
+By applying a theory of losses to the study of public support for healthcare policies, our argument is twofold. First, individuals are more likely to support expansive public spending on high-cost medicines when the situation is framed as a potential loss—especially when it threatens the life of patients. In these contexts, citizens tend to overcompensate to avoid perceived harm, even if that harm is probabilistic or affects a small group. Rather than prioritizing cost-effectiveness, we find that citizens are disproportionately motivated by the idea of preventing tragic, losses. This pattern reverses the traditional assumption that citizens, when confronted with trade-offs, act as rational utility-maximizers. In fact, existing research supports this intuition. For instance, Slovic (2007) and Jenni and Loewenstein (1997) have shown that people are far more willing to take costly actions to save specific, identified individuals than when the beneficiaries are anonymous or statistical. Why would the public endorse unconditional funding for a treatment that benefits only a handful of patients and threatens healthcare budgets elsewhere? Our explanation is rooted in how people respond to potential loss: when exposed to “rescue” narratives, citizens perceive the withholding of care as morally unacceptable and react with disproportionate support for public provision—even at great cost. 
+
+Second, this tendency intensifies when the perceived moral stakes are high, or when the treatment is framed as a last resort. In these cases, the public is not merely insensitive to cost—they become actively risk-seeking, favoring funding decisions that would otherwise be seen as inefficient or unsustainable. The idea of “not doing everything possible” feels like an intolerable failure. Thus, our findings diverge from traditional public policy models that assume preferences are grounded in budgetary realism. Instead, we argue that citizens are psychologically committed to avoiding loss—particularly avoidable death or suffering—even when it entails greater risk. This aligns with previous work suggesting that moralized framing can dominate cost-benefit logic (Kogut & Ritov 2005; Baron 1997). Importantly, our findings are not simply about emotional response—they reflect a broader pattern in which loss sensitivity reshapes how people prioritize fairness, need, and resource allocation in health policy. In these contexts, supporting expensive treatment is not about maximizing public utility—it is about not being complicit in loss. 
+
+ 
+
+Here’s some for your consideration and to be freely modified /Katri:  
+
+Data collection:  
+
+  
+
+Data originates from the Finnish Medicines Barometer, a national, cross-sectional population survey collected by the Finnish Medicines Agency biennially, to examine experiences, opinions, and values related to health, medicines, and well-being. The 2021 wave included an ad hoc module with a survey experiment on opinions related to public funding on novel, expensive oncology medicines. Data collection was purchased from a market research company (Taloustutkimus Ltd). Survey respondents were derived from a pre-recruited internet panel containing approximately 40,000 Finns. To achieve the target number of 2,000 respondents, 10,105 invitations were sent to panelists representing 18−79-year-old Finnish-speaking Finns, stratified by gender, age, level of education and area of residence, yielding 2,081 responses. 
+
+
+\FloatBarrier
+\newpage
+
+
+
+\clearpage
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\printbibliography
+\clearpage
+\newpage
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WORD COUNT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+<<wordcount, echo=FALSE, cache=FALSE, warning = FALSE>>=
+library(knitr)
+
+comma <- function (x, ...) {
+  format(x, ..., big.mark = ",", scientific = FALSE, trim = TRUE)
+}
+
+# To dynamically extract name of the current file, use code below
+nameoffile <- current_input() # get name of file
+nof2 <-  strsplit(nameoffile,"\\.")[[1]][1] # extract name, drop extension
+noftex <- paste(nof2, ".tex", sep="") # add .tex extension
+systemcall <- paste("system('texcount -inc -incbib -total -sum ", noftex, "', intern=TRUE)", sep="") # paste together texcount system command
+texcount.out <- eval(parse(text=systemcall)) # run texcount on current last compiled .tex file
+
+sum.row <- grep("Sum count", texcount.out, value=TRUE) # extract row
+pattern <- "(\\d)+" # regex pattern for digits
+
+count <- regmatches(sum.row, regexpr(pattern, sum.row) )
+# extract digits
+
+count <- comma(as.numeric(count)) # add comma
+@
+
+
+\begin{center}
+\vspace*{\stretch{1}}
+\dotfill
+\dotfill {\huge {\bf Word count}: \Sexpr{count}} \dotfill
+\dotfill
+\vspace*{\stretch{1}}
+\end{center}
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WORD COUNT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Online Appendix
+%\newpage
+%\section{Online Appendix}
+%\pagenumbering{Roman}
+%\setcounter{page}{1}
+
+
+
+%% reset tables and figures counter
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+
+
+
+\section{Appendix}
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+
+\subsection{Regression Models}
+\FloatBarrier
+
+Here.
+
+\end{document}
+
+
