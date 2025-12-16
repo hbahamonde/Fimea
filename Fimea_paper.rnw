@@ -153,20 +153,6 @@ knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
 
 \section{Public Support for Healthcare Policies: Is the glass half-full or half-empty?}
 
-By applying a theory of losses to the study of public support for healthcare policies, our argument is twofold. First, individuals are more likely to support expansive public spending on high-cost medicines when the situation is framed as a potential loss—especially when it threatens the life of patients. In these contexts, citizens tend to overcompensate to avoid perceived harm, even if that harm is probabilistic or affects a small group. Rather than prioritizing cost-effectiveness, we find that citizens are disproportionately motivated by the idea of preventing tragic, losses. This pattern reverses the traditional assumption that citizens, when confronted with trade-offs, act as rational utility-maximizers. In fact, existing research supports this intuition. For instance, Slovic (2007) and Jenni and Loewenstein (1997) have shown that people are far more willing to take costly actions to save specific, identified individuals than when the beneficiaries are anonymous or statistical. Why would the public endorse unconditional funding for a treatment that benefits only a handful of patients and threatens healthcare budgets elsewhere? Our explanation is rooted in how people respond to potential loss: when exposed to “rescue” narratives, citizens perceive the withholding of care as morally unacceptable and react with disproportionate support for public provision—even at great cost. 
-
-Second, this tendency intensifies when the perceived moral stakes are high, or when the treatment is framed as a last resort. In these cases, the public is not merely insensitive to cost—they become actively risk-seeking, favoring funding decisions that would otherwise be seen as inefficient or unsustainable. The idea of “not doing everything possible” feels like an intolerable failure. Thus, our findings diverge from traditional public policy models that assume preferences are grounded in budgetary realism. Instead, we argue that citizens are psychologically committed to avoiding loss—particularly avoidable death or suffering—even when it entails greater risk. This aligns with previous work suggesting that moralized framing can dominate cost-benefit logic (Kogut & Ritov 2005; Baron 1997). Importantly, our findings are not simply about emotional response—they reflect a broader pattern in which loss sensitivity reshapes how people prioritize fairness, need, and resource allocation in health policy. In these contexts, supporting expensive treatment is not about maximizing public utility—it is about not being complicit in loss. 
-
- 
-
-Here’s some for your consideration and to be freely modified /Katri:  
-
-Data collection:  
-
-  
-
-Data originates from the Finnish Medicines Barometer, a national, cross-sectional population survey collected by the Finnish Medicines Agency biennially, to examine experiences, opinions, and values related to health, medicines, and well-being. The 2021 wave included an ad hoc module with a survey experiment on opinions related to public funding on novel, expensive oncology medicines. Data collection was purchased from a market research company (Taloustutkimus Ltd). Survey respondents were derived from a pre-recruited internet panel containing approximately 40,000 Finns. To achieve the target number of 2,000 respondents, 10,105 invitations were sent to panelists representing 18−79-year-old Finnish-speaking Finns, stratified by gender, age, level of education and area of residence, yielding 2,081 responses. 
-
 
 \FloatBarrier
 \newpage
@@ -254,4 +240,17 @@ Here.
 
 \end{document}
 
+By applying a theory of losses to the study of public support for healthcare policies, our argument is twofold. First, individuals are more likely to support expansive public spending on high-cost medicines when the situation is framed as a potential loss—especially when it threatens the life of patients. In these contexts, citizens tend to overcompensate to avoid perceived harm, even if that harm is probabilistic or affects a small group. Rather than prioritizing cost-effectiveness, we find that citizens are disproportionately motivated by the idea of preventing tragic, losses. This pattern reverses the traditional assumption that citizens, when confronted with trade-offs, act as rational utility-maximizers. In fact, existing research supports this intuition. For instance, Slovic (2007) and Jenni and Loewenstein (1997) have shown that people are far more willing to take costly actions to save specific, identified individuals than when the beneficiaries are anonymous or statistical. Why would the public endorse unconditional funding for a treatment that benefits only a handful of patients and threatens healthcare budgets elsewhere? Our explanation is rooted in how people respond to potential loss: when exposed to “rescue” narratives, citizens perceive the withholding of care as morally unacceptable and react with disproportionate support for public provision—even at great cost. 
+
+Second, this tendency intensifies when the perceived moral stakes are high, or when the treatment is framed as a last resort. In these cases, the public is not merely insensitive to cost—they become actively risk-seeking, favoring funding decisions that would otherwise be seen as inefficient or unsustainable. The idea of “not doing everything possible” feels like an intolerable failure. Thus, our findings diverge from traditional public policy models that assume preferences are grounded in budgetary realism. Instead, we argue that citizens are psychologically committed to avoiding loss—particularly avoidable death or suffering—even when it entails greater risk. This aligns with previous work suggesting that moralized framing can dominate cost-benefit logic (Kogut \& Ritov 2005; Baron 1997). Importantly, our findings are not simply about emotional response—they reflect a broader pattern in which loss sensitivity reshapes how people prioritize fairness, need, and resource allocation in health policy. In these contexts, supporting expensive treatment is not about maximizing public utility—it is about not being complicit in loss. 
+
+ 
+
+Here’s some for your consideration and to be freely modified /Katri:  
+
+Data collection:  
+
+  
+
+Data originates from the Finnish Medicines Barometer, a national, cross-sectional population survey collected by the Finnish Medicines Agency biennially, to examine experiences, opinions, and values related to health, medicines, and well-being. The 2021 wave included an ad hoc module with a survey experiment on opinions related to public funding on novel, expensive oncology medicines. Data collection was purchased from a market research company (Taloustutkimus Ltd). Survey respondents were derived from a pre-recruited internet panel containing approximately 40,000 Finns. To achieve the target number of 2,000 respondents, 10,105 invitations were sent to panelists representing 18−79-year-old Finnish-speaking Finns, stratified by gender, age, level of education and area of residence, yielding 2,081 responses. 
 
