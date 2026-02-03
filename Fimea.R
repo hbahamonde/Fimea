@@ -58,7 +58,7 @@ dat$income_group <- forcats::fct_collapse(dat$M1_10,
                                           "Other/Unknown" = c("I do not want to answer", "I don't know"))
 
 # Set "Control" as the reference category
-dat$Frame <- relevel(dat$Frame, ref = "Control")
+# dat$Frame <- relevel(dat$Frame, ref = "Control")
 
 # Recode spending on medicine
 dat$M2_11.r <- NA  # initialize new variable
@@ -139,30 +139,42 @@ model <- polr(outcome ~ Frame +
 # summary(model)
 
 # Generate predicted probabilities for a predictor
-p_load(ggeffects)
-predicted_probs <- ggpredict(model, terms = "Frame")
+p_load(ggeffects, ggplot2, stringr)
+
+# 90% CI (alpha = 0.10)
+predicted_probs <- ggpredict(model, terms = "Frame", ci.lvl = 0.90)
 
 # plot
-p_load(ggplot2)
 dodge <- position_dodge(width = 0.3)
 
-pred_plot <- ggplot(predicted_probs, 
-       aes(x = x, y = predicted, color = response.level, 
-           group = response.level)) + 
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), 
-                  position = dodge) + 
-  theme_minimal() +
+pred_plot <- ggplot(predicted_probs,
+                    aes(x = x, y = predicted, color = response.level,
+                        group = response.level)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
+                  position = dodge) +
+  scale_color_discrete(
+    name = NULL,
+    labels = function(x) stringr::str_wrap(x, width = 70)
+  ) +
+  theme_minimal(base_size = 11) +   # keep body readable
   theme(
     legend.position = "bottom",
     legend.direction = "vertical",
-    legend.key.height = unit(0.5, "cm")
+    
+    legend.text  = element_text(size = 8),   # <-- THIS is the key
+    legend.title = element_text(size = 8),
+    
+    legend.key.height = unit(0.4, "cm"),
+    legend.box.spacing = unit(0.3, "cm"),
+    
+    aspect.ratio = 1,
+    panel.border = element_rect(fill = NA, linewidth = 0.8)
   ) +
-  guides(colour = guide_legend(title = "", ncol = 1)) + 
+  guides(colour = guide_legend(ncol = 1)) +
   labs(x = "Frame", y = "Predicted Probabilities")
 
 
-## ---- 
-
+# Compare stats
 
 compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
   # Convert confidence intervals to standard errors
@@ -194,134 +206,57 @@ compare_estimates_ci(
 )
 
 
-# Models
+## Table
 
-library(MASS)
-
-build_sequential_models <- function(base_formula, controls, data, outcome_var, weights_var = NULL, method = "logistic") {
-  models <- list()
+# Nice labels (edit as needed)
+coef_map <- c(
+  # Frames
+  "FrameRule of Rescue"      = "Rule of rescue (vs. control)",
+  "FrameUtility Maximizing" = "Utility maximizing (vs. control)",
   
-  for (i in seq_along(controls)) {
-    control_terms <- paste(controls[1:i], collapse = " + ")
-    full_formula <- as.formula(paste(outcome_var, "~", base_formula, "+", control_terms))
-    
-    model_name <- paste0("m.", i)
-    
-    models[[model_name]] <- polr(
-      formula = full_formula,
-      data = data,
-      method = method,
-      Hess = TRUE,
-      weights = if (!is.null(weights_var)) data[[weights_var]] else NULL
-    )
-  }
+  # Gender
+  "M1_1Male"                = "Male (vs. female)",
   
-  # Add final model with all controls
-  full_control_terms <- paste(controls, collapse = " + ")
-  full_formula <- as.formula(paste(outcome_var, "~", base_formula, "+", full_control_terms))
-  models[["m.final"]] <- polr(
-    formula = full_formula,
-    data = data,
-    method = method,
-    Hess = TRUE,
-    weights = if (!is.null(weights_var)) data[[weights_var]] else NULL
-  )
+  # Age
+  "M1_2_1"                  = "Age",
   
-  return(models)
-}
-
-# Required base and control variable definitions
-base_formula <- "Frame + M1_1 + M1_2_1 + M1_10 + 0.32"
-controls <- c("M2_5", "M2_11", "M2_6_0", "M1_3", "M2_2", "M1_5")
-outcome_var <- "outcome"
-
-# Run the function
-models <- build_sequential_models(
-  base_formula = base_formula,
-  controls = controls,
-  data = dat,
-  outcome_var = outcome_var,
-  weights_var = "PAINOKERROIN",
-  method = "logistic"
+  # Income
+  "income_groupMiddle"      = "Income: middle (vs. low)",
+  "income_groupHigh"        = "Income: high (vs. low)",
+  "income_groupOther/Unknown" = "Income: other/unknown",
+  
+  # Region / education (whatever M1_9 actually is)
+  "M1_9"                    = "Region",
+  
+  # Kela compensation
+  "M2_5Yes"                 = "Eligible for Kela reimbursement",
+  
+  # Medicine spending
+  "M2_11mid"                = "Medicine spending: medium",
+  "M2_11high"               = "Medicine spending: high"
 )
 
-# table
-p_load(texreg)
-screenreg(models, 
-          #omit.coef = "_2_",
-          scalebox = 0.1,
-          booktabs = TRUE, 
-          use.packages = TRUE)
 
-# Interaction (income_group)
-# 1. Framing effects are inelastic to income groups, e.g., both rich and poor react similarly to the frames.
+#dat$Frame <- relevel(factor(dat$Frame), ref = "B")
 
-model <- polr(outcome ~ Frame*income_group + 
-                M1_1 + # Gender
-                M1_2_1 + # Age
-                # M2_6_0 + # Has a long-term illness 
-                # M1_3 +  # marital status 
-                M2_2, # Illness that affect function to work
-                # M1_5 + # Occupation (includes retired)
-                #M2_11 + # how much spends on medicine
-                #income_group, # income
-              data = dat, 
-              method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
-              Hess = TRUE,
-              weights = PAINOKERROIN)
+p_load(MASS, modelsummary, broom, dplyr, tibble)
 
-predicted_probs <- ggpredict(model, terms = c("Frame", "income_group"))
+dir.create("build", showWarnings = FALSE, recursive = TRUE)
 
-ggplot(predicted_probs, 
-       aes(x = x, y = predicted, color = group)) + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
-                position = position_dodge(width = 0.5), width = 0.3) + 
-  geom_line(position = position_dodge(width = 0.5), aes(group = group)) +
-  geom_point(position = position_dodge(width = 0.5)) +
-  facet_wrap(~response.level) + 
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "vertical",
-    legend.key.height = unit(0.5, "cm")
-  ) +
-  guides(colour = guide_legend(title = "income_group", ncol = 1)) + 
-  labs(x = "Frame", y = "Predicted Probabilities")
+tab_tex <- modelsummary::msummary(
+  list("Ordinal logit" = model),
+  coef_map = coef_map,
+  exponentiate = TRUE,
+  statistic = "conf.int",
+  conf_level = 0.90,
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|RMSE|F|R2|Adj|Within|Between|Std.Errors",
+  output = "latex_tabular"
+)
 
-# Interaction (M2_13)
-# 1. Framing effects are inelastic to income groups, e.g., both rich and poor react similarly to the frames.
+writeLines(enc2utf8(as.character(tab_tex)), "build/table_model.tex", useBytes = TRUE)
 
-model <- polr(outcome ~ Frame*M2_13 + 
-                M1_1 + # Gender
-                M1_2_1 + # Age
-                # M2_6_0 + # Has a long-term illness 
-                # M1_3 +  # marital status 
-                #M2_2 + # Illness that affect function to work
-              # M1_5 + # Occupation (includes retired)
-              #M2_11 + # how much spends on medicine
-                M2_1, # income
-              data = dat, 
-              method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
-              Hess = TRUE,
-              weights = PAINOKERROIN)
-
-predicted_probs <- ggpredict(model, terms = c("Frame", "M2_13"))
-
-ggplot(predicted_probs, 
-       aes(x = x, y = predicted, color = group)) + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
-                position = position_dodge(width = 0.5), width = 0.3) + 
-  geom_line(position = position_dodge(width = 0.5), aes(group = group)) +
-  geom_point(position = position_dodge(width = 0.5)) +
-  facet_wrap(~response.level) + 
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "vertical",
-    legend.key.height = unit(0.5, "cm")
-  ) +
-  guides(colour = guide_legend(title = "M2_13", ncol = 1)) + 
-  labs(x = "Frame", y = "Predicted Probabilities")
+## ---- 
 
 
 #########

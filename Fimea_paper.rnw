@@ -34,6 +34,16 @@
 \usepackage{float}
 \usepackage{placeins}
 
+\usepackage{tabularray}
+\usepackage{codehigh}
+\usepackage[normalem]{ulem}
+\UseTblrLibrary{booktabs}
+\UseTblrLibrary{siunitx}
+\newcommand{\tinytableTabularrayUnderline}[1]{\underline{#1}}
+\newcommand{\tinytableTabularrayStrikeout}[1]{\sout{#1}}
+\NewTableCommand{\tinytableDefineColor}[3]{\definecolor{#1}{#2}{#3}}
+
+
 %---- % Allows abstract customization
 \usepackage{abstract} 
 \renewcommand{\abstractnamefont}{\normalfont\bfseries} % Set the "Abstract" text to bold
@@ -233,7 +243,9 @@ Prospect theory yields clear expectations for how preferences should vary across
 
 
 
-<<pred, fig.width=11, fig.height=4, out.width='\\textwidth', fig.cap='Title', echo=FALSE, message=FALSE, warning=FALSE>>=
+<<pred, fig.height=5, fig.cap='Framing Effects on Public Support for Funding a High-Cost Cancer Medicine', echo=FALSE, message=FALSE, warning=FALSE>>=
+
+
 print(pred_plot)
 
 @
@@ -325,8 +337,21 @@ count <- comma(as.numeric(count)) # add comma
 \subsection{Regression Models}
 \FloatBarrier
 
-Here.
+\begin{table}[!htbp]
+\centering
+\caption{Framing Effects on Public Support for Funding Expensive Cancer Medicines}
+\label{tab:ologit-models}
+%\setlength{\tabcolsep}{3.5pt} % tighten intercolumn spacing
+\input{build/table_model.tex}
+\par\vspace{0.4ex}
+\footnotesize \emph{Notes:} Entries report odds ratios from an ordinal logistic regression. The dependent variable measures respondents' preferred funding decision for a novel, high-cost cancer medicine, ordered from unconditional public funding to outright rejection. The key independent variable captures experimental framing of the decision context. Control variables include gender, age, income group, education, eligibility for Kela medicine reimbursement, and self-reported medicine expenditure. Models are estimated using survey weights. 90\% confidence intervals in parentheses. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
+\end{table}
+
+
 
 \end{document}
+
+
+
 
 
