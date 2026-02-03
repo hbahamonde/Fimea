@@ -97,8 +97,6 @@ dat$M2_13_binary <- ifelse(
   )
 
 dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems"))
-## ---- 
-
 
 # models
 
@@ -148,7 +146,7 @@ predicted_probs <- ggpredict(model, terms = "Frame")
 p_load(ggplot2)
 dodge <- position_dodge(width = 0.3)
 
-ggplot(predicted_probs, 
+pred_plot <- ggplot(predicted_probs, 
        aes(x = x, y = predicted, color = response.level, 
            group = response.level)) + 
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high), 
@@ -161,6 +159,9 @@ ggplot(predicted_probs,
   ) +
   guides(colour = guide_legend(title = "", ncol = 1)) + 
   labs(x = "Frame", y = "Predicted Probabilities")
+
+
+## ---- 
 
 
 compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
@@ -251,16 +252,6 @@ screenreg(models,
           scalebox = 0.1,
           booktabs = TRUE, 
           use.packages = TRUE)
-
-
-
-
-
-
-
-
-
-
 
 # Interaction (income_group)
 # 1. Framing effects are inelastic to income groups, e.g., both rich and poor react similarly to the frames.
