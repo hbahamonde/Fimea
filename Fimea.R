@@ -18,22 +18,37 @@ load("/Users/hectorbahamonde/research/Fimea/dat.RData")
 # recoding
 p_load(dplyr)
 dat <- dat %>%
-  mutate(outcome = factor(outcome, 
+  mutate(outcome = factor(outcome,
                           levels = c(
-                            "The medicine should not be introduced with social funding",  # Least supportive (1)
-                            "A medicine should be introduced at public expense if a company lowers its price",  # Middle (2)
-                            "The medicine should be made available at public expense, regardless of the price charged by the company"  # Most supportive (3)
-                          ), ordered = TRUE))
-
+                            "The medicine should not be introduced with social funding",
+                            "A medicine should be introduced at public expense if a company lowers its price",
+                            "The medicine should be made available at public expense, regardless of the price charged by the company"
+                          ),
+                          labels = c(
+                            "Reject public funding",
+                            "Conditional funding (if price is reduced)",
+                            "Unconditional public funding"
+                          ),
+                          ordered = TRUE
+  ))
 # Remove rows
 p_load(tidyverse)
 dat <- dat %>% filter(!is.na(outcome))
 dat <- dat %>% filter(Frame != "Frame A") %>% mutate(Frame = fct_drop(Frame))  # Drop unused levels
 
 # Recode the Frame variable
-dat$Frame <- factor(dat$Frame, 
-                    levels = c("Frame B", "Frame C", "Frame D"),  # Questionnaires
-                    labels = c("Control", "Rule of Rescue", "Utility Maximizing"))
+p_load(dplyr, forcats)
+
+dat <- dat %>%
+  filter(!is.na(outcome)) %>%
+  filter(Frame %in% c("Frame B", "Frame C", "Frame D")) %>%
+  mutate(
+    Frame = factor(Frame,
+                   levels = c("Frame B", "Frame C", "Frame D"),
+                   labels = c("Control", "Loss (rescue) frame", "Gains (stewardship) frame")
+    )
+  )
+
 
 # recoding
 dat$M1_1 = as.factor(dat$M1_1)
@@ -156,17 +171,15 @@ pred_plot <- ggplot(predicted_probs,
     name = NULL,
     labels = function(x) stringr::str_wrap(x, width = 70)
   ) +
-  theme_minimal(base_size = 11) +   # keep body readable
+  coord_flip() +   # rotate the whole plot
+  theme_minimal(base_size = 11) +
   theme(
     legend.position = "bottom",
     legend.direction = "vertical",
-    
-    legend.text  = element_text(size = 8),   # <-- THIS is the key
+    legend.text  = element_text(size = 8),
     legend.title = element_text(size = 8),
-    
     legend.key.height = unit(0.4, "cm"),
     legend.box.spacing = unit(0.3, "cm"),
-    
     aspect.ratio = 1,
     panel.border = element_rect(fill = NA, linewidth = 0.8)
   ) +
@@ -211,9 +224,8 @@ compare_estimates_ci(
 # Nice labels (edit as needed)
 coef_map <- c(
   # Frames
-  "FrameRule of Rescue"      = "Rule of rescue (vs. control)",
-  "FrameUtility Maximizing" = "Utility maximizing (vs. control)",
-  
+  "FrameLoss (rescue) frame"         = "Loss (rescue) frame (vs. control)",
+  "FrameGains (stewardship) frame"   = "Gains (stewardship) frame (vs. control)",  
   # Gender
   "M1_1Male"                = "Male (vs. female)",
   
@@ -360,8 +372,7 @@ ggplot(predicted_probs,
 
 ## ---- abstract ----
 fileConn <- file ("abstract.txt")
-abstract.c = as.character(c("Governments frequently delegate authority over costly and controversial healthcare funding decisions to insulated bodies in order to manage distributive conflict and reduce political pressure. Yet public responses to these decisions remain highly sensitive to how identical choices are presented. This article examines whether delegation constrains framing effects on mass preferences, or whether citizens’ evaluations of state funding decisions remain elastic to framing even when authority is formally insulated from electoral politics. Drawing on prospect theory, we argue that preferences over healthcare spending are reference-point dependent, such that citizens respond differently when funding decisions are framed as avoiding salient losses versus preserving existing gains. We test this argument using a population-based survey experiment embedded in the 2021 Finnish Medicines Barometer, in which respondents evaluate an identical clinical vignette involving a novel, high-cost cancer medicine with uncertain benefits and are randomly assigned to alternative frames emphasizing last-resort rescue or stewardship of finite collective resources. Holding clinical evidence, costs, and uncertainty constant, we find substantial and systematic framing effects on mass preferences over public funding. Support for funding increases when decisions are framed as loss avoidance and decreases when framed as gain preservation, despite identical policy content. These findings demonstrate that delegation does not neutralize framing effects on mass preferences. Instead, delegated decision-making creates a political environment in which public communication and interpretive frames remain central to how distributive choices are evaluated. By integrating research on framing with the political economy of delegation, this article explains why distributive healthcare policies remain politically contested even when removed from direct mass decision-making and highlights the behavioral foundations of public responses to state action under conditions of risk, scarcity, and institutional insulation."))
-writeLines(abstract.c, fileConn)
+abstract.c = as.character(c("Governments often insulate authority over costly and controversial healthcare funding decisions from day-to-day electoral politics, relying on technical assessments and objective criteria to justify those decisions. Yet public responses to these decisions remain highly sensitive to how identical choices are presented. This article examines whether institutional insulation constrains framing effects on mass preferences, or whether citizens’ evaluations of state funding decisions remain elastic to framing even when authority is formally insulated from electoral politics. Drawing on prospect theory, we argue that preferences over healthcare spending are reference-point dependent, such that citizens respond differently when funding decisions are framed as avoiding salient losses versus preserving existing gains. We test this argument using a population-based survey experiment embedded in the 2021 Finnish Medicines Barometer, in which respondents evaluate an identical clinical vignette involving a novel, high-cost cancer medicine with uncertain benefits and are randomly assigned to alternative frames emphasizing last-resort rescue or stewardship of finite collective resources. Holding clinical evidence, costs, and uncertainty constant, we find substantial and systematic framing effects on mass preferences over public funding. Support for funding increases when decisions are framed as loss avoidance and decreases when framed as gain preservation, despite identical policy content. These findings demonstrate that institutional insulation from electoral politics does not neutralize framing effects on mass preferences. Instead, decisions justified through technical criteria remain politically consequential because public communication and interpretive frames shape how citizens evaluate distributive choices. By integrating research on framing with the political economy of delegation, this article explains why distributive healthcare policies remain politically contested even when citizens are not the formal decision-makers and highlights the behavioral foundations of public responses to state action under conditions of risk, scarcity, and institutional insulation."))
 close(fileConn)
 ## ----
 
