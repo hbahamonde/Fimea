@@ -315,11 +315,11 @@ where $Y_i$ denotes respondent $i$’s preferred funding decision, ordered from 
 \centering
 \caption{Summary Statistics and Covariate Balance Across Framing Conditions in the Survey Experiment}
 
-\scalebox{0.8}{%
+\scalebox{0.7}{%
 \begin{minipage}{\linewidth}
 \centering
 
-<<summary, fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=6.0, out.width="\\linewidth">>=
+<<summary, fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE, fig.width=4.5, fig.height=5.5, out.width="\\linewidth">>=
 
 print(sum_plot)
 
