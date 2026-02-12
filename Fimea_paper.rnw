@@ -76,14 +76,14 @@
 
 
 
-\author[1]{\textsc{Katri Aaltonen}\thanks{\href{mailto:katri.m.aaltonen@utu.fi}{katri.m.aaltonen@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/katri-aaltonen}{\texttt{https://www.utu.fi/fi/ihmiset/katri-aaltonen}}}}
-\author[2]{\textsc{Hector Bahamonde}\thanks{\href{mailto:hector.bahamonde@utu.fi}{hector.bahamonde@utu.fi}; \href{https://www.hectorbahamonde.com}{\texttt{https://www.hectorbahamonde.com}}}}
-\author[3]{\textsc{Mikko Niemelä}\thanks{\href{mailto:mikko.niemela@utu.fi}{mikko.niemela@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/mikko-niemela}{\texttt{https://www.utu.fi/fi/ihmiset/mikko-niemela}}. \\{\bf {\color{blue}Authors are listed in alphabetical order; all authors contributed equally}.}}}
+\author[1]{\textsc{Hector Bahamonde}\thanks{\href{mailto:hector.bahamonde@utu.fi}{hector.bahamonde@utu.fi}; \href{https://www.hectorbahamonde.com}{\texttt{https://www.hectorbahamonde.com}}}}
+\author[2]{\textsc{Mikko Niemelä}\thanks{\href{mailto:mikko.niemela@utu.fi}{mikko.niemela@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/mikko-niemela}{\texttt{https://www.utu.fi/fi/ihmiset/mikko-niemela}}.}}
+\author[3]{\textsc{Katri Aaltonen}\thanks{\href{mailto:katri.m.aaltonen@utu.fi}{katri.m.aaltonen@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/katri-aaltonen}{\texttt{https://www.utu.fi/fi/ihmiset/katri-aaltonen}}}}
 
 
-\affil[1]{Academy Research Fellow, INVEST Research Flagship Centre, University of Turku, Finland}
-\affil[2]{Senior Researcher, INVEST Research Flagship Centre, University of Turku, Finland}
-\affil[3]{Professor of Sociology, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[1]{Senior Researcher, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[2]{Professor of Sociology, INVEST Research Flagship Centre, University of Turku, Finland}
+\affil[3]{Academy Research Fellow, INVEST Research Flagship Centre, University of Turku, Finland}
 
 %\affil[ ]{\textit{Authors are listed in alphabetical order; all authors contributed equally.}}
 
@@ -115,11 +115,16 @@ options(scipen = 999)  # large enough; avoids overflows or odd behavior
 
 <<echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE>>=
 knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
+
 @
 
 <<loadings, include=FALSE, cache=FALSE, eval=TRUE, error=FALSE, results='hide', ref.label='loadings'>>=
+
 @
 
+<<balance_plot, include=FALSE, cache=FALSE, eval=TRUE, error=FALSE, results='hide', ref.label='balance_plot'>>=
+
+@
 
 <<abstract, echo=FALSE, comment=NA, warning=FALSE, message=FALSE, include = FALSE, cache=FALSE, eval=TRUE>>=
 
@@ -303,7 +308,33 @@ Formally, the estimated model can be written as:
 
 where $Y_i$ denotes respondent $i$’s preferred funding decision, ordered from unconditional funding to rejection; $\tau_j$ represents threshold parameters; $\text{Rescue}_i$ and $\text{Stewardship}_i$ indicate assignment to the loss-framed and gain-framed conditions, respectively; and $\mathbf{X}_i$ is a vector of individual-level covariates including gender, age, income group, health status indicators, and medicine expenditures. \autoref{eq:ordinal_model} therefore estimates how framing shifts the latent propensity to favor more restrictive funding positions, holding observed characteristics constant.
 
-{\color{red}add sum stat table }
+
+
+% sum state here
+\begin{figure}[H]
+\centering
+\caption{Summary Statistics and Covariate Balance Across Framing Conditions in the Survey Experiment}
+
+\scalebox{0.8}{%
+\begin{minipage}{\linewidth}
+\centering
+
+<<summary, fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=6.0, out.width="\\linewidth">>=
+
+print(sum_plot)
+
+@
+\end{minipage}%
+
+}
+
+\end{figure}
+
+\label{fig:summary}
+\vspace{0.25em}
+{\footnotesize \textit{Notes:} The figure summarizes sample composition by experimental condition (Control, Loss/rescue, and Gains/stewardship). The age panel displays weighted kernel density estimates of respondents' age. The remaining panels report weighted percentages within each framing condition for the covariates used in the main model (\autoref{eq:ordinal_model}). All estimates use survey weights. The close overlap across conditions suggests good covariate balance from random assignment.}
+
+
 
 \subsection{Results}
 
@@ -418,7 +449,7 @@ count <- comma(as.numeric(count)) # add comma
 \setcounter{page}{1}
 
 
-\subsection{Regression Models}
+\subsection{Regression Model}
 \FloatBarrier
 
 \begin{table}[!htbp]
@@ -450,3 +481,14 @@ count <- comma(as.numeric(count)) # add comma
 Finally, more recent applications connect reference dependence to inequality and distributional politics, reinforcing that citizens’ evaluations of allocation are shaped by comparative baselines. Hybrid approaches to distributional accounts emphasize how perceptions of inequality depend on reference points \textcite{Waltl2022}. In healthcare, comparisons across medicines and across public spending categories provide alternative anchors for evaluating what counts as an extraordinary cost and what counts as a justified entitlement.
 } 
 
+
+
+\begin{table}[!htbp]
+\centering
+\caption{Caption}
+\label{tab:sum-stats}
+%\setlength{\tabcolsep}{3.5pt} % tighten intercolumn spacing
+\input{/Users/hectorbahamonde/research/Fimea/build/table_summary.tex}
+\par\vspace{0.4ex}
+\footnotesize \emph{Notes:} Notes.
+\end{table}

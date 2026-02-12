@@ -51,6 +51,7 @@ dat <- dat %>%
 
 
 # recoding
+dat$M1_1 <- factor(dat$M1_1, levels = c("Female", "Male", "Other"))
 dat$M1_1 = as.factor(dat$M1_1)
 dat$M1_10 = as.factor(dat$M1_10) # income
 dat$M1_2_1 = as.numeric(dat$M1_2_1) # Age
@@ -271,98 +272,260 @@ writeLines(enc2utf8(as.character(tab_tex)), "build/table_model.tex", useBytes = 
 ## ---- 
 
 
-#########
-# Decision Making Experiment
-#########
-cat("\014")
-rm(list=ls())
-setwd("/Users/hectorbahamonde/research/Fimea/")
 
-# Pacman
-if (!require("pacman")) install.packages("pacman"); library(pacman) 
 
-# loadings
+## ---- summary_table
+p_load(dplyr, modelsummary, tidyr, tibble)
+
+dir.create("build", showWarnings = FALSE, recursive = TRUE)
+
+sum_vars <- c("Frame", "M1_1", "M1_2_1", "M1_10", "M1_9", "M2_5", "M2_11")
+
+# Estimation-relevant sample (complete cases on listed vars + outcome + weights)
+dat_s <- dat %>%
+  dplyr::select(dplyr::all_of(c("PAINOKERROIN", "outcome", sum_vars))) %>%
+  dplyr::filter(!is.na(outcome)) %>%
+  dplyr::filter(dplyr::if_all(dplyr::all_of(sum_vars), ~ !is.na(.))) %>%
+  dplyr::mutate(
+    PAINOKERROIN = suppressWarnings(as.numeric(PAINOKERROIN)),
+    M1_2_1       = suppressWarnings(as.numeric(M1_2_1))
+  ) %>%
+  dplyr::filter(is.finite(PAINOKERROIN), PAINOKERROIN > 0, is.finite(M1_2_1))
+
+# weights (numeric, already filtered)
+w <- dat_s$PAINOKERROIN
+
+# weighted mean/sd (numeric-safe)
+w_mean <- function(x, w) {
+  x <- suppressWarnings(as.numeric(x))
+  w <- suppressWarnings(as.numeric(w))
+  ok <- is.finite(x) & is.finite(w) & w > 0
+  x <- x[ok]; w <- w[ok]
+  sum(w * x) / sum(w)
+}
+
+w_sd <- function(x, w) {
+  x <- suppressWarnings(as.numeric(x))
+  w <- suppressWarnings(as.numeric(w))
+  ok <- is.finite(x) & is.finite(w) & w > 0
+  x <- x[ok]; w <- w[ok]
+  mu <- sum(w * x) / sum(w)
+  sqrt(sum(w * (x - mu)^2) / sum(w))
+}
+
+# Age row (numeric) — keep column types consistent for bind_rows()
+age_tbl <- tibble::tibble(
+  Variable = "M1_2_1",
+  Level    = NA_character_,
+  N        = length(dat_s$M1_2_1),
+  Percent  = NA_real_,
+  Mean     = round(w_mean(dat_s$M1_2_1, w), 2),
+  SD       = round(w_sd(dat_s$M1_2_1, w), 2),
+  Min      = suppressWarnings(min(dat_s$M1_2_1, na.rm = TRUE)),
+  Max      = suppressWarnings(max(dat_s$M1_2_1, na.rm = TRUE))
+)
+
+# weighted frequency table for categorical vars
+wfreq_tbl <- function(df, var, wvar = "PAINOKERROIN") {
+  v <- df[[var]]
+  if (!is.factor(v)) v <- factor(v)
+  
+  df2 <- df %>% dplyr::mutate(.v = v)
+  tot_w <- sum(df2[[wvar]], na.rm = TRUE)
+  
+  df2 %>%
+    dplyr::group_by(.v) %>%
+    dplyr::summarise(
+      N = dplyr::n(),
+      wsum = sum(.data[[wvar]], na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      Percent  = round(100 * wsum / tot_w, 2),
+      Variable = var,
+      Level    = as.character(.v),
+      Mean = NA_real_,
+      SD   = NA_real_,
+      Min  = NA_real_,
+      Max  = NA_real_
+    ) %>%
+    dplyr::select(Variable, Level, N, Percent, Mean, SD, Min, Max)
+}
+
+cat_vars <- c("Frame", "M1_1", "M1_10", "M1_9", "M2_5", "M2_11")
+cat_tbl <- dplyr::bind_rows(lapply(cat_vars, function(v) wfreq_tbl(dat_s, v)))
+
+# Combine (categoricals first, then age)
+sum_df <- dplyr::bind_rows(cat_tbl, age_tbl) %>%
+  dplyr::mutate(
+    Variable = dplyr::recode(
+      Variable,
+      Frame = "Frame",
+      M1_1  = "Gender (M1_1)",
+      M1_10 = "Income (M1_10)",
+      M1_9  = "Region (M1_9)",
+      M2_5  = "Kela reimbursement eligibility (M2_5)",
+      M2_11 = "Medicine spending (M2_11)",
+      M1_2_1 = "Age"
+    )
+  )
+
+# Export to LaTeX
+tab_sum_tex <- modelsummary::datasummary_df(
+  sum_df,
+  title = "Summary statistics (Framing experiment)",
+  notes = "Percentages are weighted using PAINOKERROIN; N is unweighted. Estimation sample: complete cases on listed variables.",
+  output = "latex_tabular"
+)
+
+writeLines(
+  enc2utf8(as.character(tab_sum_tex)),
+  "/Users/hectorbahamonde/research/Fimea/build/table_summary.tex",
+  useBytes = TRUE
+)
+## ----
+
+
+
+
+## ---- balance_plot
+
+pacman::p_load(dplyr, tidyr, forcats, ggplot2, patchwork, stringr, tibble)
+
 load("/Users/hectorbahamonde/research/Fimea/dat.RData")
 
-# From Katri
-# The hypotheses are broadly that 
-## 1. Framing Exp: framing affects how individuals answer the decision making task.
-## 2. Dec Mak Exp: having to do the decision making task (vs. not having to do it) affects general opinions and trust. 
+dat_plot <- dat %>%
+  dplyr::mutate(
+    PAINOKERROIN = suppressWarnings(as.numeric(PAINOKERROIN)),
+    M1_2_1       = suppressWarnings(as.numeric(M1_2_1)),
+    Frame_raw    = as.character(Frame),
+    M1_1         = dplyr::recode(as.character(M1_1), "Mies" = "Male", .default = as.character(M1_1))
+  ) %>%
+  dplyr::filter(Frame_raw %in% c("Frame B", "Frame C", "Frame D")) %>%
+  dplyr::mutate(
+    FramePlot = factor(
+      Frame_raw,
+      levels = c("Frame B", "Frame C", "Frame D"),
+      labels = c("Control", "Loss (rescue) frame", "Gains (stewardship) frame")
+    )
+  ) %>%
+  dplyr::filter(is.finite(PAINOKERROIN), PAINOKERROIN > 0, !is.na(FramePlot))
 
-# "Frame A" (no dec making task but yes questions) and "Frame B" (yes dec mak task and yes questions)
-## Right comparison is A (dec mak) vs B (no dec mak)
-## Can't compare A v B+C+D because C and D do have other framings (rule of resq. and ut. max). THis might bias respondents.
+vars_cat <- c("M1_1", "M1_10", "M1_9", "M2_5", "M2_11")
 
-# keep Frame A and B only
-p_load(tidyverse)
-dat <- dat %>% filter(Frame %in% c("Frame A", "Frame B")) %>% mutate(Frame = fct_drop(Frame))  # Drop unused levels
+panel_map <- c(
+  M1_1  = "Gender",
+  M1_10 = "Income (raw categories)",
+  M1_9  = "Region (top 6 + other)",
+  M2_5  = "Kela reimbursement eligibility",
+  M2_11 = "Medicine spending"
+)
 
-# re-factoring
-p_load(tidyverse)
-dat <- dat %>%
-  filter(Frame %in% c("Frame A", "Frame B")) %>%
-  mutate(Frame = recode(Frame, 
-                        "Frame A" = "Without Task", 
-                        "Frame B" = "With Task"),
-         Frame = factor(Frame, levels = c("Without Task", "With Task"))) # Convert to factor with reference
+frame_levels <- c("Control", "Loss (rescue) frame", "Gains (stewardship) frame")
 
+base_small <- 6.6
 
-# recoding
-dat$M6_7_1 <- na_if(dat$M6_7_1, "I don't know")
-dat$M6_7_2 <- na_if(dat$M6_7_2, "I don't know")
+shrink_theme <- ggplot2::theme_minimal(base_size = base_small) +
+  ggplot2::theme(
+    plot.title   = ggplot2::element_text(size = base_small * 1.15),
+    axis.text    = ggplot2::element_text(size = base_small),
+    axis.title   = ggplot2::element_text(size = base_small),
+    legend.text  = ggplot2::element_text(size = base_small),
+    legend.title = ggplot2::element_text(size = base_small)
+  )
 
-p_load(dplyr, stringr)
+scale_fill_frames <- ggplot2::scale_fill_discrete(drop = FALSE, name = NULL)
 
-# M6_7_1
-dat <- dat %>%
-  mutate(M6_7_1 = str_replace(M6_7_1, "Jokseenkin eri mieltä", "Somewhat disagree")
-         )
+age_df <- dat_plot %>%
+  dplyr::filter(is.finite(M1_2_1)) %>%
+  dplyr::mutate(FramePlot = factor(FramePlot, levels = frame_levels)) %>%
+  dplyr::select(FramePlot, M1_2_1, PAINOKERROIN)
 
-# M6_7_2
-dat <- dat %>% mutate(M6_7_2 = str_replace(M6_7_2, "Jokseenkin eri mieltä", "Somewhat disagree"))
-dat <- dat %>% mutate(M6_7_2 = str_replace(M6_7_2, "Jokseenkin samaa mieltä", "Somewhat agree"))
-
-# re-factor ordered
-dat$M6_7_1 <- factor(dat$M6_7_1, 
-                     levels = c("Somewhat disagree", "Somewhat agree", "Totally disagree", "Totally agree"), 
-                     ordered = TRUE)
-
-dat$M6_7_2 <- factor(dat$M6_7_2, 
-                     levels = c("Somewhat disagree", "Somewhat agree", "Totally disagree", "Totally agree"), 
-                     ordered = TRUE
-                     )
-
-# to numeric
-dat$M6_8 <- as.numeric(sub("^([0-9]+).*", "\\1", dat$M6_8))
-
-
-# M6_7_1 M6_7_2 M6_8
-
-# models
-m1 <- lm(M6_8 ~ Frame + M2_1 + M2_2 + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat)
-summary(m1)
-
-p_load(MASS)
-model <- polr(M6_7_1 ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE)
-
-# Generate predicted probabilities for a predictor
-p_load(ggplot2, ggeffects)
-predicted_probs <- ggpredict(model, terms = "Frame")
-
-# plot
-p_load(ggplot2)
-ggplot(predicted_probs, 
-       aes(x = x, y = predicted, color = response.level)) + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), 
-                position = position_dodge(width = 0.5), width = 0.3) + 
-  theme_minimal() +
-  theme(
-    legend.position = "bottom",  # Keep legend at the bottom
-    legend.direction = "vertical",  # Stack legend levels vertically
-    legend.key.height = unit(0.5, "cm")  # Increase spacing between legend items
+p_age <- ggplot2::ggplot(
+  age_df,
+  ggplot2::aes(x = M1_2_1, weight = PAINOKERROIN, fill = FramePlot)
+) +
+  ggplot2::geom_density(alpha = 0.25, linewidth = 0, adjust = 1) +
+  ggplot2::geom_density(
+    ggplot2::aes(color = FramePlot),
+    fill = NA, linewidth = 0.7, adjust = 1,
+    show.legend = FALSE
   ) +
-  guides(colour = guide_legend(title = "", ncol = 1)) + 
-  labs(x = "Frame", y = "Predicted Probabilities")
+  ggplot2::labs(title = "Age (weighted density)", x = NULL, y = "Density") +
+  ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3)) +
+  scale_fill_frames +
+  shrink_theme +
+  ggplot2::theme(legend.position = "bottom")
+
+wprop_by_frame <- function(df, var) {
+  df %>%
+    dplyr::filter(!is.na(.data[[var]])) %>%
+    dplyr::mutate(
+      FramePlot = factor(FramePlot, levels = frame_levels),
+      Level = as.character(.data[[var]])
+    ) %>%
+    dplyr::group_by(FramePlot, Level) %>%
+    dplyr::summarise(wsum = sum(PAINOKERROIN), .groups = "drop") %>%
+    dplyr::group_by(FramePlot) %>%
+    dplyr::mutate(value = 100 * wsum / sum(wsum)) %>%
+    dplyr::ungroup() %>%
+    dplyr::transmute(
+      Panel     = unname(panel_map[var]),
+      FramePlot = FramePlot,
+      Level     = Level,
+      value     = as.numeric(value)
+    )
+}
+
+cat_df <- dplyr::bind_rows(lapply(vars_cat, function(v) wprop_by_frame(dat_plot, v)))
+
+region_rank <- cat_df %>%
+  dplyr::filter(Panel == "Region (top 6 + other)") %>%
+  dplyr::group_by(Level) %>%
+  dplyr::summarise(total = sum(value), .groups = "drop") %>%
+  dplyr::arrange(dplyr::desc(total)) %>%
+  dplyr::pull(Level)
+
+top6 <- head(region_rank, 6)
+
+cat_df <- cat_df %>%
+  dplyr::mutate(
+    Level = ifelse(Panel == "Region (top 6 + other)" & !(Level %in% top6), "Other regions", Level),
+    Level = as.character(Level),
+    FramePlot = factor(FramePlot, levels = frame_levels)
+  ) %>%
+  dplyr::group_by(Panel, FramePlot, Level) %>%
+  dplyr::summarise(value = sum(value), .groups = "drop") %>%
+  dplyr::filter(is.finite(value), !is.na(Level), !is.na(FramePlot))
+
+make_panel <- function(panel, wrap_width = 28) {
+  dfp <- cat_df %>% dplyr::filter(Panel == panel)
+  
+  ggplot2::ggplot(dfp, ggplot2::aes(y = forcats::fct_rev(Level), x = value, fill = FramePlot)) +
+    ggplot2::geom_col(
+      position = ggplot2::position_dodge(width = 0.8),
+      width = 0.7,
+      show.legend = FALSE
+    ) +
+    ggplot2::labs(title = panel, x = NULL, y = NULL) +
+    ggplot2::scale_y_discrete(labels = function(x) stringr::str_wrap(x, wrap_width)) +
+    scale_fill_frames +
+    shrink_theme +
+    ggplot2::theme(legend.position = "none")
+}
+
+p_gender <- make_panel("Gender", 22)
+p_income <- make_panel("Income (raw categories)", 28)
+p_kela   <- make_panel("Kela reimbursement eligibility", 30)
+p_spend  <- make_panel("Medicine spending", 30)
+p_region <- make_panel("Region (top 6 + other)", 28)
+
+sum_plot <- (p_gender | p_income) /
+  (p_kela   | p_spend)  /
+  (p_region)            /
+  (p_age)
+
+## ----
 
 
 
