@@ -256,6 +256,16 @@ p_load(MASS, modelsummary, broom, dplyr, tibble)
 
 dir.create("build", showWarnings = FALSE, recursive = TRUE)
 
+# true estimation N (complete cases actually used by polr)
+n_obs <- nrow(model.frame(model))
+
+# Create a GOF row to append (modelsummary expects columns named like your model list)
+add_gof <- data.frame(
+  term = "Num.Obs.",
+  `Ordinal logit` = n_obs,
+  check.names = FALSE
+)
+
 tab_tex <- modelsummary::msummary(
   list("Ordinal logit" = model),
   coef_map = coef_map,
@@ -263,7 +273,9 @@ tab_tex <- modelsummary::msummary(
   statistic = "conf.int",
   conf_level = 0.90,
   stars = TRUE,
-  gof_omit = "AIC|BIC|Log.Lik|RMSE|F|R2|Adj|Within|Between|Std.Errors",
+  # IMPORTANT: remove the default Num.Obs. row (often becomes sum of weights)
+  gof_omit = "Num\\.Obs\\.|Observations|AIC|BIC|Log\\.Lik|RMSE|F|R2|Adj|Within|Between|Std\\.Errors",
+  add_rows = add_gof,
   output = "latex_tabular"
 )
 
