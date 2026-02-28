@@ -45,7 +45,7 @@ dat <- dat %>%
   mutate(
     Frame = factor(Frame,
                    levels = c("Frame B", "Frame C", "Frame D"),
-                   labels = c("Control", "Loss (rescue) frame", "Gains (stewardship) frame")
+                   labels = c("Control", "Loss (rescue) frame", "Gains (health maximisation) frame")
     )
   )
 
@@ -226,7 +226,7 @@ compare_estimates_ci(
 coef_map <- c(
   # Frames
   "FrameLoss (rescue) frame"         = "Loss (rescue) frame (vs. control)",
-  "FrameGains (stewardship) frame"   = "Gains (stewardship) frame (vs. control)",  
+  "FrameGains (health maximisation) frame"   = "Gains (health maximisation) frame (vs. control)",  
   # Gender
   "M1_1Male"                = "Male (vs. female)",
   
@@ -418,7 +418,7 @@ dat_plot <- dat %>%
     FramePlot = factor(
       Frame_raw,
       levels = c("Frame B", "Frame C", "Frame D"),
-      labels = c("Control", "Loss (rescue) frame", "Gains (stewardship) frame")
+      labels = c("Control", "Loss (rescue) frame", "Gains (health maximisation) frame")
     )
   ) %>%
   dplyr::filter(is.finite(PAINOKERROIN), PAINOKERROIN > 0, !is.na(FramePlot))
@@ -433,7 +433,7 @@ panel_map <- c(
   M2_11 = "Medicine spending"
 )
 
-frame_levels <- c("Control", "Loss (rescue) frame", "Gains (stewardship) frame")
+frame_levels <- c("Control", "Loss (rescue) frame", "Gains (health maximisation) frame")
 
 base_small <- 6.6
 
@@ -467,7 +467,10 @@ p_age <- ggplot2::ggplot(
   ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3)) +
   scale_fill_frames +
   shrink_theme +
-  ggplot2::theme(legend.position = "bottom")
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.text = ggplot2::element_text(size = 5.5)  # <- add this
+  )
 
 wprop_by_frame <- function(df, var) {
   df %>%
@@ -547,7 +550,7 @@ sum_plot <- (p_gender | p_income) /
 
 ## ---- abstract ----
 fileConn <- file ("abstract.txt")
-abstract.c = as.character(c("Governments increasingly rely on technocratic delegation to insulate contentious healthcare rationing decisions from day-to-day electoral politics, grounding reimbursement choices in health technology assessment and other technical criteria. Yet these decisions still require public acceptance, and political-psychological responses to communicated justifications may condition perceived legitimacy even when policy content is constant. Drawing on prospect theory and the rule of rescue, we argue that citizens evaluate identical funding decisions relative to reference points activated by communication, such that loss-framed “last-resort rescue” rationales should elicit greater tolerance for fiscal risk and uncertainty than gain-framed stewardship rationales emphasizing opportunity costs and finite collective resources. We test this argument with a population-based survey experiment embedded in the 2021 Finnish Medicines Barometer (citizens aged 18–79; analytic N = 2,081), where respondents evaluated the same vignette describing a novel, high-cost cancer medicine with uncertain benefits and were randomly assigned to a control condition or to frames emphasizing rescue versus stewardship. Using weighted ordinal logistic regression and predicted probabilities, we find that framing systematically shifts mass preferences over public funding: the rescue frame increases support for unconditional coverage and reduces outright rejection relative to control, whereas the stewardship frame shifts preferences toward more restrictive positions. These patterns suggest that institutional insulation does not neutralize framing effects because it does not change the cognitive mechanisms through which distributive trade-offs under risk are interpreted. More broadly, the results highlight how communicative environments shape citizens’ judgments about fairness and state responsibility in delegated policy domains, with implications for political trust, accountability narratives, and the contestability of expert-justified rationing decisions."))
+abstract.c = as.character(c("Governments increasingly rely on technocratic delegation to insulate contentious healthcare rationing decisions from day-to-day electoral politics, grounding reimbursement choices in health technology assessment and other technical criteria. Yet these decisions still require public acceptance, and political-psychological responses to communicated justifications may condition perceived legitimacy even when policy content is constant. Drawing on prospect theory and the rule of rescue, we argue that citizens evaluate identical funding decisions relative to reference points activated by communication, such that loss-framed “last-resort rescue” rationales should elicit greater tolerance for fiscal risk and uncertainty than gain-framed (health maximisation) rationales emphasizing opportunity costs and finite collective resources. We test this argument with a population-based survey experiment embedded in the 2021 Finnish Medicines Barometer (citizens aged 18–79; analytic N = 2,081), where respondents evaluated the same vignette describing a novel, high-cost cancer medicine with uncertain benefits and were randomly assigned to a control condition or to frames emphasizing rescue versus health maximisation. Using weighted ordinal logistic regression and predicted probabilities, we find that framing systematically shifts mass preferences over public funding: the rescue frame increases support for unconditional coverage and reduces outright rejection relative to control, whereas the health maximisation frame shifts preferences toward more restrictive positions. These patterns suggest that institutional insulation does not neutralize framing effects because it does not change the cognitive mechanisms through which distributive trade-offs under risk are interpreted. More broadly, the results highlight how communicative environments shape citizens’ judgments about fairness and state responsibility in delegated policy domains, with implications for political trust, accountability narratives, and the contestability of expert-justified rationing decisions."))
 close(fileConn)
 ## ----
 
