@@ -13,24 +13,44 @@ if (!require("pacman")) install.packages("pacman"); library(pacman)
 
 # loadings
 load("/Users/hectorbahamonde/research/Fimea/dat.RData")
+## original dataset
+## p_load(haven)
+## dat2 <- read_sav("/Users/hectorbahamonde/research/Fimea/original_dataset/Lääkebarometri2021_internet_panel.sav")
 
 
 # recoding
 p_load(dplyr)
 dat <- dat %>%
+  mutate(
+    outcome = dplyr::coalesce(
+      outcome,
+      if_else(M6_6_KEHYSB == "I don't know", "I don't know", NA_character_),
+      if_else(M6_6_KEHYSC == "I don't know", "I don't know", NA_character_),
+      if_else(M6_6_KEHYSD == "I don't know", "I don't know", NA_character_)
+    )
+  )
+
+# recoding (now safe to factorize outcome)
+p_load(dplyr)
+
+dat <- dat %>%
   mutate(outcome = factor(outcome,
                           levels = c(
                             "The medicine should not be introduced with social funding",
                             "A medicine should be introduced at public expense if a company lowers its price",
-                            "The medicine should be made available at public expense, regardless of the price charged by the company"
+                            "The medicine should be made available at public expense, regardless of the price charged by the company",
+                            "I don't know"
                           ),
                           labels = c(
                             "Reject public funding",
                             "Conditional funding (if price is reduced)",
-                            "Unconditional public funding"
+                            "Unconditional public funding",
+                            "I don't know"
                           ),
                           ordered = TRUE
   ))
+
+
 # Remove rows
 p_load(tidyverse)
 dat <- dat %>% filter(!is.na(outcome))
@@ -53,7 +73,26 @@ dat <- dat %>%
 # recoding
 dat$M1_1 <- factor(dat$M1_1, levels = c("Female", "Male", "Other"))
 dat$M1_1 = as.factor(dat$M1_1)
+# Keep only Female/Male (drop "Other" + any NA)
+dat <- dat %>%
+  dplyr::filter(M1_1 %in% c("Female", "Male")) %>%
+  dplyr::mutate(M1_1 = droplevels(M1_1))
 dat$M1_10 = as.factor(dat$M1_10) # income
+# Recode income (M1_10) into broader groups
+dat <- dat %>%
+  dplyr::mutate(
+    income_group = forcats::fct_collapse(
+      M1_10,
+      "Up to 3000 €"   = c("Up to 1000 €", "1001-2000 €", "2001-3000 €"),
+      "3001-5000 €"    = c("3001-4000 €", "4001-5000 €"),
+      "5001+ €"        = c("5001-8000 €", "Over 8000"),
+      "Missing/No answer" = c("I do not want to answer", "I don't know")
+    ),
+    income_group = factor(
+      income_group,
+      levels = c("Up to 3000 €", "3001-5000 €", "5001+ €", "Missing/No answer")
+    )
+  )
 dat$M1_2_1 = as.numeric(dat$M1_2_1) # Age
 dat$M1_5 = as.factor(dat$M1_5) # Occupation (includes retired)
 dat$M2_2 = as.factor(dat$M2_2) # Illness that affect function to work
@@ -63,15 +102,23 @@ dat$M2_11 = as.factor(dat$M2_11) # how much spends on medicine
 dat$PAINOKERROIN = as.numeric(dat$PAINOKERROIN) # weight
 dat$M1_3 = as.factor(dat$M1_3) # marital status 
 dat$M1_9 = as.factor(dat$M1_9) # region
-dat$M2_1 = as.factor(dat$M2_1) # how's your health today
-dat$M2_13 = as.factor(dat$M2_13) # had financial problems to buy medicines last year
+# Recode region (M1_9) to NUTS2 (Finland)
+dat <- dat %>%
+  dplyr::mutate(
+    M1_9 = dplyr::case_when(
+      M1_9 == "Uusimaa" ~ "Helsinki-Uusimaa",
+      M1_9 %in% c("Southwest Finland", "Kanta-Häme", "Päijät-Häme", "Kymenlaakso", "South Karelia") ~ "Southern Finland",
+      M1_9 %in% c("Satakunta", "Pirkanmaa", "Central Finland", "South Ostrobothnia", "Ostrobothnia") ~ "Western Finland",
+      M1_9 %in% c("Etelä-Savo", "North Savo", "North Karelia", "Central Ostrobothnia", "North Ostrobothnia", "Kainuu", "Lapland") ~ "Northern and Eastern Finland",
+      M1_9 == "Åland" ~ "Åland",
+      TRUE ~ NA_character_
+    ),
+    M1_9 = factor(
+      M1_9,
+      levels = c("Helsinki-Uusimaa", "Southern Finland", "Western Finland", "Northern and Eastern Finland", "Åland")
+    )
+  )
 
-# recode income
-dat$income_group <- forcats::fct_collapse(dat$M1_10,
-                                          "Low" = c("Up to 1000 €", "1001-2000 €"),  # use exact output from levels(dat$M1_10)
-                                          "Middle" = c("2001-3000 €", "3001-4000 €"),
-                                          "High" = c("4001-5000 €", "5001-8000 €", "Over 8000"),
-                                          "Other/Unknown" = c("I do not want to answer", "I don't know"))
 
 # Set "Control" as the reference category
 # dat$Frame <- relevel(dat$Frame, ref = "Control")
@@ -94,16 +141,6 @@ dat$M2_11.r[dat$M2_11 == "I don't know"] <- NA  # optional, already NA if not ma
 
 dat$M2_11.r = as.factor(dat$M2_11.r)
 
-# recode age
-dat$age_groups <- cut(
-  dat$M1_2_1,
-  breaks = c(17, 34, 59, 79),  # make sure lower bound includes 18
-  labels = c("young", "middle", "old"),
-  right = TRUE,
-  include.lowest = TRUE
-  )
-
-dat$age_groups <- factor(dat$age_groups, levels = c("young", "middle", "old"))
 
 # recode problems last year var
 dat$M2_13_binary <- ifelse(
@@ -132,6 +169,7 @@ dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems
 # Fit the ordinal logistic regression model
 p_load(MASS)
 # Ordered Logistic or Probit Regression
+dat <- droplevels(dat)
 model <- polr(outcome ~ Frame + 
                 # must have
                 M1_1 + # Gender
@@ -160,6 +198,15 @@ p_load(ggeffects, ggplot2, stringr)
 # 90% CI (alpha = 0.10)
 predicted_probs <- ggpredict(model, terms = "Frame", ci.lvl = 0.90)
 
+# force legend order so "I don't know" is last
+predicted_probs$response.level <- factor(
+  predicted_probs$response.level,
+  levels = c(
+    setdiff(as.character(unique(predicted_probs$response.level)), "I don't know"),
+    "I don't know"
+  )
+)
+
 # plot
 dodge <- position_dodge(width = 0.3)
 
@@ -168,11 +215,23 @@ pred_plot <- ggplot(predicted_probs,
                         group = response.level)) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high),
                   position = dodge) +
-  scale_color_discrete(
+  scale_color_manual(
     name = NULL,
+    values = c(
+      "Reject public funding" = "red",
+      "Conditional funding (if price is reduced)" = "goldenrod2",
+      "Unconditional public funding" = "green",
+      "I don't know" = "gray"
+    ),
+    breaks = c(
+      "Reject public funding",
+      "Conditional funding (if price is reduced)",
+      "Unconditional public funding",
+      "I don't know"
+    ),
     labels = function(x) stringr::str_wrap(x, width = 70)
   ) +
-  coord_flip() +   # rotate the whole plot
+  coord_flip() +
   theme_minimal(base_size = 11) +
   theme(
     legend.position = "bottom",
@@ -212,12 +271,12 @@ compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
   return(as.data.frame(t(results)))
 }
 
-compare_estimates_ci(
-  est1 = 0.27, 
-  ci1 = c(0.22, 0.32), 
-  est2 = 0.35, 
-  ci2 = c(0.28, 0.43)
-)
+# compare_estimates_ci(
+#  est1 = 0.27, 
+#  ci1 = c(0.22, 0.32), 
+#  est2 = 0.35, 
+#  ci2 = c(0.28, 0.43)
+#)
 
 
 ## Table
@@ -404,36 +463,33 @@ writeLines(
 
 pacman::p_load(dplyr, tidyr, forcats, ggplot2, patchwork, stringr, tibble)
 
-load("/Users/hectorbahamonde/research/Fimea/dat.RData")
+# IMPORTANT: do NOT reload dat.RData here; use the already-recoded `dat`
+# If you insist on reloading, you must re-run the same recodes again.
 
 dat_plot <- dat %>%
   dplyr::mutate(
     PAINOKERROIN = suppressWarnings(as.numeric(PAINOKERROIN)),
     M1_2_1       = suppressWarnings(as.numeric(M1_2_1)),
-    Frame_raw    = as.character(Frame),
-    M1_1         = dplyr::recode(as.character(M1_1), "Mies" = "Male", .default = as.character(M1_1))
+    FramePlot    = factor(Frame, levels = levels(Frame))  # Frame already recoded above
   ) %>%
-  dplyr::filter(Frame_raw %in% c("Frame B", "Frame C", "Frame D")) %>%
-  dplyr::mutate(
-    FramePlot = factor(
-      Frame_raw,
-      levels = c("Frame B", "Frame C", "Frame D"),
-      labels = c("Control", "Loss (rescue) frame", "Gains (health maximisation) frame")
-    )
+  dplyr::filter(
+    is.finite(PAINOKERROIN), PAINOKERROIN > 0,
+    !is.na(FramePlot)
   ) %>%
-  dplyr::filter(is.finite(PAINOKERROIN), PAINOKERROIN > 0, !is.na(FramePlot))
+  droplevels()
 
-vars_cat <- c("M1_1", "M1_10", "M1_9", "M2_5", "M2_11")
+# Use your NEW variables
+vars_cat <- c("M1_1", "income_group", "M1_9", "M2_5", "M2_11")
 
 panel_map <- c(
-  M1_1  = "Gender",
-  M1_10 = "Income (raw categories)",
-  M1_9  = "Region (top 6 + other)",
-  M2_5  = "Kela reimbursement eligibility",
-  M2_11 = "Medicine spending"
+  M1_1         = "Gender",
+  income_group = "Income",
+  M1_9         = "Region",
+  M2_5         = "Kela reimbursement eligibility",
+  M2_11        = "Medicine spending"
 )
 
-frame_levels <- c("Control", "Loss (rescue) frame", "Gains (health maximisation) frame")
+frame_levels <- levels(dat_plot$FramePlot)
 
 base_small <- 6.6
 
@@ -469,10 +525,10 @@ p_age <- ggplot2::ggplot(
   shrink_theme +
   ggplot2::theme(
     legend.position = "bottom",
-    legend.text = ggplot2::element_text(size = 5.5)  # <- add this
+    legend.text = ggplot2::element_text(size = 5.5)
   )
 
-wprop_by_frame <- function(df, var) {
+wprop_by_frame <- function(df, var, wvar = "PAINOKERROIN") {
   df %>%
     dplyr::filter(!is.na(.data[[var]])) %>%
     dplyr::mutate(
@@ -480,7 +536,7 @@ wprop_by_frame <- function(df, var) {
       Level = as.character(.data[[var]])
     ) %>%
     dplyr::group_by(FramePlot, Level) %>%
-    dplyr::summarise(wsum = sum(PAINOKERROIN), .groups = "drop") %>%
+    dplyr::summarise(wsum = sum(.data[[wvar]], na.rm = TRUE), .groups = "drop") %>%
     dplyr::group_by(FramePlot) %>%
     dplyr::mutate(value = 100 * wsum / sum(wsum)) %>%
     dplyr::ungroup() %>%
@@ -493,25 +549,6 @@ wprop_by_frame <- function(df, var) {
 }
 
 cat_df <- dplyr::bind_rows(lapply(vars_cat, function(v) wprop_by_frame(dat_plot, v)))
-
-region_rank <- cat_df %>%
-  dplyr::filter(Panel == "Region (top 6 + other)") %>%
-  dplyr::group_by(Level) %>%
-  dplyr::summarise(total = sum(value), .groups = "drop") %>%
-  dplyr::arrange(dplyr::desc(total)) %>%
-  dplyr::pull(Level)
-
-top6 <- head(region_rank, 6)
-
-cat_df <- cat_df %>%
-  dplyr::mutate(
-    Level = ifelse(Panel == "Region (top 6 + other)" & !(Level %in% top6), "Other regions", Level),
-    Level = as.character(Level),
-    FramePlot = factor(FramePlot, levels = frame_levels)
-  ) %>%
-  dplyr::group_by(Panel, FramePlot, Level) %>%
-  dplyr::summarise(value = sum(value), .groups = "drop") %>%
-  dplyr::filter(is.finite(value), !is.na(Level), !is.na(FramePlot))
 
 make_panel <- function(panel, wrap_width = 28) {
   dfp <- cat_df %>% dplyr::filter(Panel == panel)
@@ -530,10 +567,10 @@ make_panel <- function(panel, wrap_width = 28) {
 }
 
 p_gender <- make_panel("Gender", 22)
-p_income <- make_panel("Income (raw categories)", 28)
+p_income <- make_panel("Income", 28)
 p_kela   <- make_panel("Kela reimbursement eligibility", 30)
 p_spend  <- make_panel("Medicine spending", 30)
-p_region <- make_panel("Region (top 6 + other)", 28)
+p_region <- make_panel("Region", 28)
 
 sum_plot <- (p_gender | p_income) /
   (p_kela   | p_spend)  /

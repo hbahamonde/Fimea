@@ -309,3 +309,5 @@ TSWLatexianTemp*
 .Rhistory
 
 temp/.DS_Store
+
+.DS_Store
