@@ -70,31 +70,45 @@
 \newcommand{\trustpol}{\texttt{Q9\_4}}    % trust in Finnish politicians
 \newcommand{\ind}[1]{\mathbbm{1}\!\left\{#1\right\}}
 
-%\title{Losers, Delegation, and the Ideological Valence of Expertise: Evidence from Finland}
-\vspace{-1cm}\title{\textbf{\input{title.txt}\unskip}} % Article title
 
 
 
 
+\vspace{-3cm}\title{{\bf When Delegation Meets Framing: Experimental Evidence on Mass Preferences over Healthcare Spending}}
 
-\author[1]{\textsc{Hector Bahamonde}\thanks{\href{mailto:hector.bahamonde@utu.fi}{hector.bahamonde@utu.fi}; \href{https://www.hectorbahamonde.com}{\texttt{https://www.hectorbahamonde.com}}}}
-\author[1,2]{\textsc{Mikko Niemelä}\thanks{\href{mailto:mikko.niemela@utu.fi}{mikko.niemela@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/mikko-niemela}{\texttt{https://www.utu.fi/fi/ihmiset/mikko-niemela}}}}
-\author[1,2]{\textsc{Katri Aaltonen}\thanks{\href{mailto:katri.m.aaltonen@utu.fi}{katri.m.aaltonen@utu.fi}; \href{https://www.utu.fi/fi/ihmiset/katri-aaltonen}{\texttt{https://www.utu.fi/fi/ihmiset/katri-aaltonen}}}}
+\vspace{-2cm}
+
+% (optional) tighten authblk spacing a bit
+% --- Authors (emails on one line)
+\author[1]{\textsc{Hector Bahamonde}}
+\author[1,2]{\textsc{Mikko Niemel{\"a}}}
+\author[1,2]{\textsc{Katri Aaltonen}}
+
+% one-line email row (no superscript)
+\affil[ ]{\small
+  \href{mailto:hector.bahamonde@utu.fi}{hector.bahamonde@utu.fi} \,|\, 
+  \href{mailto:mikko.niemela@utu.fi}{mikko.niemela@utu.fi} \,|\, 
+  \href{mailto:katri.m.aaltonen@utu.fi}{katri.m.aaltonen@utu.fi} \vspace{1cm}
+}
 
 \affil[1]{INVEST Research Flagship Centre, University of Turku, Finland}
 \affil[2]{The Social Insurance Institution of Finland}
 
-%\affil[ ]{\textit{Authors are listed in alphabetical order; all authors contributed equally.}}
+\vspace{-2cm}\date{\today}
 
 
-
-
-\date{\today}
 
 \begin{document}
 
 
 \maketitle
+
+\begingroup
+\renewcommand\thefootnote{}\footnotetext{This work was supported by the Research Council of Finland (decision number: 354657) and the Research Council of Finland Flagship Programme (decision number: 345546). We thank attendees of the 2026 INVEST Conference (Turku, Finland) and the 2026 International Social Pharmacy Workshop (Cork, Ireland).}
+\addtocounter{footnote}{0}
+\endgroup
+
+
 \thispagestyle{empty}
 
 <<setup, include=FALSE>>=
@@ -135,44 +149,47 @@ knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
 
 
 
-%\newpage
+\newpage
+\pagestyle{empty}
 \vspace{-1cm}
 \begin{abstract}
 \input{abstract.txt}\unskip
 \end{abstract}
 
-
-
 \vspace*{0.3cm}
 \centerline{{\bf Abstract length}: \Sexpr{abstract.c.l} words.}
 \vspace*{0.3cm}
-
-
-
-%\centerline{\bf Please consider downloading the last version of the paper \href{https://raw.githubusercontent.com/hbahamonde/democratic_backsliding/main/2025/Dem_Backsliding_2.pdf}{\texttt{{\color{red}here}}}.}
 
 \vspace*{0.3cm}
 \centerline{\bf {\color{red}PLEASE DO NOT CIRCULATE}.}
 
 \vspace*{0.5cm}
-\centerline{\providecommand{\keywords}[1]{\textbf{\textit{Keywords---}} #1} % keywords.  
-\keywords{{\input{keywords.txt}\unskip}}}
-
-
+\centerline{\providecommand{\keywords}[1]{\textbf{\textit{Keywords---}} #1}
+\keywords{framing effects; healthcare rationing; delegation; mass preferences; political economy.}}
 
 \clearpage
+\thispagestyle{empty}
+
+{\noindent\bf Ethical statement:} No ethical board approval was required for this type of study. Data collection was organised by the Finnish Medicines Agency (Fimea) in compliance with the national ethical instructions. Permission to use data for the current study has been approved by Fimea (Dnro FIMEA/2022/002982). The survey cover letter contained an explanation of the purpose of the study and the handling of the obtained data, and answering the survey was regarded as informed consent to participate. The data were pseudonymised by the data providers, and the researchers had no access to the personal identifiers of the study subjects.
+
+\vspace{1em}
+
+{\noindent\bf AI statement:} Artificial intelligence tool Microsoft Copilot was used to support language editing, proofreading, and minor editorial refinement. After using this tool, the authors reviewed and edited the content as needed and take full responsibility for the content of the publication.
+
+\clearpage
+\pagestyle{plain}
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-
 \section{Introduction}
+\setcounter{page}{1}
 
 % 1
 All health systems must set priorities in order to allocate scarce fiscal, personnel, and medical resources. Rationing occurs when potentially beneficial interventions are withheld from individuals (Scheunemann and White 2011). It is inherently political and marked by moral and ethical dilemmas, alongside conflicting values and interests \parencite{BaeroeBaltussen2014LegitimateLimitSetting, Baltussen2016PrioritySettingUHC}. Funding decisions of novel, high-cost medicines exemplify the societal tensions involved, often surfacing as debates in the media \parencite{AbelsonCollins2009MediaHypingHerceptin, CorbettMori1999MedicineMediaCelebrities}.
-In this article, we provide experimental evidence on how citizens’ support for public funding of novel cancer medicine varies depending on how the decision is framed. Previous research suggests that societal preferences regarding high-cost medications are susceptible to emotionally charged narratives circulated through mass media, which can, in turn, shape political decision-making \parencite{Gabe2012HerceptinCountervailingPowers, Aggarwal2017CancerDrugsFund, PinhoDiasCosta2020MassMediaObstacleRationing}.
+In this article, we provide experimental evidence on how citizens’ support for public funding of a novel cancer medicine varies depending on how the decision is framed. Previous research suggests that societal preferences regarding high-cost medications are susceptible to emotionally charged narratives circulated through mass media, which can, in turn, shape political decision-making \parencite{Gabe2012HerceptinCountervailingPowers, Aggarwal2017CancerDrugsFund, PinhoDiasCosta2020MassMediaObstacleRationing}.
 
 % 2
-We examine whether preferences over healthcare funding decisions remain elastic to framing effects even when these decisions are insulated from partisan politics and are not presented through individual patient stories. In democracies with publicly funded healthcare systems, politics is the arena in which the values guiding prioritisation and rationing are debated. Nevertheless, reimbursement decisions are typically delegated to specialised arm’s-length agencies that employ applied methods, such as health technology assessment (HTA), to inform decision-making \parencite{EgebergTrondal2009Agencification, ECChamova2018MappingHTA}. These institutional arrangements are envisaged to depoliticise decision-making (Thatcher 2002). Yet technical complexity and confidentiality can distance such processes from qualities associated with legitimacy \parencite{BarrenhoLopert2022PriceTransparencyOECD, Mitton2006CentralizedDrugReviewFairness, KapiririRazavi2017SystematicPrioritySetting, DanielsSabin2008AccountabilityUpdate, DanielsVanDerWilt2016HTADeliberative}. To assess whether institutional insulation neutralises framing effects, we field a survey experiment embedded in the 2021 Finnish Medicines Barometer in which we randomly vary the interpretive frame attached to an otherwise identical reimbursement decision. This design allows us to test the prospect-theoretic proposition that delegation does not alter the underlying cognitive mechanisms through which distributive trade-offs are evaluated and, more broadly, to assess whether, even in delegated settings justified through expert rationales rather than individual patient narratives, public interpretation remains a consequential arena in which the legitimacy and acceptability of rationing decisions are constructed.
+We examine whether preferences over healthcare funding decisions remain elastic to framing effects even when these decisions are insulated from partisan politics and are not presented through individual patient stories. In democracies with publicly funded healthcare systems, politics is the arena in which the values guiding prioritisation and rationing are debated. Nevertheless, reimbursement decisions are typically delegated to specialised arm's-length agencies that employ applied methods, such as health technology assessment (HTA), to inform decision-making \parencite{EgebergTrondal2009Agencification, ECChamova2018MappingHTA}. These institutional arrangements are envisaged to depoliticise decision-making (Thatcher 2002). Yet technical complexity and confidentiality can distance such processes from qualities associated with legitimacy \parencite{BarrenhoLopert2022PriceTransparencyOECD, Mitton2006CentralizedDrugReviewFairness, KapiririRazavi2017SystematicPrioritySetting, DanielsSabin2008AccountabilityUpdate, DanielsVanDerWilt2016HTADeliberative}. To assess whether institutional insulation neutralises framing effects, we field a survey experiment embedded in the 2021 Finnish Medicines Barometer in which we randomly vary the interpretive frame attached to an otherwise identical reimbursement decision. This design allows us to test the prospect-theoretic proposition that delegation does not alter the underlying cognitive mechanisms through which distributive trade-offs are evaluated and, more broadly, to assess whether, even in delegated settings justified through expert rationales rather than individual patient narratives, public interpretation remains a consequential arena in which the legitimacy and acceptability of rationing decisions are constructed.
 
 
 % 3
@@ -187,7 +204,7 @@ Understanding the elasticity of mass preferences is essential for navigating how
 {\color{red}Why this is important (legitimacy, trust, policy feedback) (1-2 paragraphs) MIKKO}
 
 
-This paper proceeds as follows. In \autoref{values} we review the core principles and contested value trade-offs that structure healthcare priority setting and, in turn, supply the normative content for competing justifications of rationing decisions. In \autoref{theory} we develop the theoretical argument, specifying how prospect theory and the rule of rescue generate reference-point-dependent evaluations of high-cost reimbursement decisions under technocratic delegation. Next, \autoref{empirics} describes the survey experiment embedded in the 2021 Finnish Medicines Barometer, including the framing manipulation and the empirical strategy used to estimate framing effects (\autoref{eq:ordinal_model}). We then present the results, reporting covariate balance (\autoref{fig:summary}) and model-based predicted probabilities across experimental conditions (\autoref{fig:pred}). In \autoref{discussion} we offer some implications for the legitimacy and contestability of expert-justified rationing decisions in publicly funded healthcare systems.
+This paper proceeds as follows. In \Cref{values} we review the core principles and contested value trade-offs that structure healthcare priority setting and, in turn, supply the normative content for competing justifications of rationing decisions. In \Cref{theory} we develop the theoretical argument, specifying how prospect theory and the rule of rescue generate reference-point-dependent evaluations of high-cost reimbursement decisions under technocratic delegation. Next, \Cref{empirics} describes the survey experiment embedded in the 2021 Finnish Medicines Barometer, including the framing manipulation and the empirical strategy used to estimate framing effects (\Cref{eq:ordinal_model}). We then present the results, reporting covariate balance (\Cref{fig:summary}) and model-based predicted probabilities across experimental conditions (\Cref{fig:pred}). In \Cref{discussion} we offer some implications for the legitimacy and contestability of expert-justified rationing decisions in publicly funded healthcare systems.
 
 
 \subsection{Values underpinning priority setting in healthcare}\label{values}
@@ -202,7 +219,8 @@ The focus of this article is, however, on values related to the content of decis
 
 Social justice and equity considerations include the concepts of horizontal and vertical equity \parencite{ODonnell2008AnalyzingHealthEquity}. In healthcare, this implies that people with similar conditions, or conditions of similar severity, should be treated in the same way, while people with differing levels of disease severity should receive differential treatment according to their respective needs. Controversy arises when determining which personal characteristics are relevant to assessing those needs \parencite{ClarkWeale2012SocialValuesPrioritySetting}. Are people of different ages, family structures, societal contributions, life expectancies, or lifestyle choices treated differently, or are such characteristics deemed irrelevant? For instance, the ‘fair innings’ intuition reflects preferences that view older people as already having enjoyed more life years than younger individuals, thereby prioritising the young so they too may be given the opportunity for a similar lifespan \parencite{Oliver2009FairTestFairInnings, Watters2016FairInningsEmpiricalPerspective, Adler2025FairInnings}.
 
-Health maximisation criterion also clash with peoples’ intuitive ‘rule of rescue’ obligation to save individuals from imminent death at any cost, even when those costs could be used more efficiently elsewhere \parencite{Cookson2008RuleOfRescue, Sinclair2022ExplainingRuleOfRescue, Andrade2025EthicalShortcomingsQALY}. The ‘rule of rescue’ has been attributed to preferences for identifiable patients, although it appears to apply more broadly \parencite{McKieRichardson2003RuleOfRescue, Sinclair2022ExplainingRuleOfRescue}. One explanation centers on narrative considerations: people may be averse to let others to die suddenly without the opportunity settle their affairs, say goodbye, and come to terms with death \parencite{Sinclair2022ExplainingRuleOfRescue}.
+Health maximisation criterion also clashes with peoples’ intuitive ‘rule of rescue’ obligation to save individuals from imminent death at any cost, even when those costs could be used more efficiently elsewhere \parencite{Cookson2008RuleOfRescue, Sinclair2022a, Andrade2025EthicalShortcomingsQALY}. The ‘rule of rescue’ has been attributed to preferences for identifiable patients, although it appears to apply more broadly \parencite{McKie2003, Sinclair2022a}. One explanation centers on narrative considerations: people may be averse to letting others die suddenly, without the opportunity to settle their affairs, say goodbye, and come to terms with death \parencite{Sinclair2022a}.
+
 
 Payers have attempted to incorporate social justice and ‘rule of rescue’ considerations into the assessment criteria through various methods \parencite{Cookson2008RuleOfRescue, Dukhanin2018IntegratingSocialJustice, Mahdiani2024QALYStillQALY}. Proportional or absolute shortfall methods seek to account for disease severity \parencite{Mahdiani2024QALYStillQALY} while end-of-life premiums allow relaxed cost-per-QALY thresholds for treatments expected to extend the lives of patients close to death \parencite{Olofsson2018EndOfLifePremiumCancer}. Nevertheless, even relaxed criteria require some evidence of added months, weeks or even days of life. Yet from the perspective of a severely ill patient and their family, it may be profoundly important that something, anything, is done, regardless of high levels of uncertainty about whether the intervention is beneficial or even harmful \parencite{ClarkWeale2012SocialValuesPrioritySetting, MacLeod2016HighCostCancerDrugsReview}. Consequently, patients and citizens seem far less willing to accept any prioritisation based on cost than payers \parencite{MacLeod2016HighCostCancerDrugsReview}. Furthermore, application of ‘rule of rescue’ as funding criteria has created concerns over the ‘fetishisation of technology,’ meaning the prioritising of making technologies available to all human conditions at the expense of population health \parencite{Cookson2008RuleOfRescue}.
 
@@ -246,7 +264,7 @@ The empirical analysis draws on data from the 2021 Finnish Medicines Barometer, 
 
 Finland provides an appropriate research context for three reasons. First, the healthcare system is comprehensive and predominantly publicly funded, resembling other advanced welfare states in which questions of healthcare rationing and legitimacy are politically salient \parencite{Keskimaki2019FinlandHiT}. Second, healthcare resource allocation decisions are routinely justified through clinical evidence, cost-effectiveness thresholds, and health technology assessment, making the communicative dimension of these decisions especially important. However, despite the normative emphasis on transparency as a core dimension of legitimate limit-setting, justifications for pharmaceutical reimbursement decisions in Finland are confidential to the public and only communicated to the pharmaceutical company applying for reimbursement status. Third, Nordic healthcare systems face precisely the structural pressures that motivate this study: technological and demographic changes contribute to a widening gap between medical opportunities and fiscal possibilities, which is a common source of controversy among stakeholders.
 
-Data collection was carried out by a professional market research company (Taloustutkimus Ltd) using a pre-recruited online panel of approximately 40,000 Finnish citizens. To reach the target sample size, 10,105 invitations were distributed to panel members. The sample was stratified to ensure balance across gender, age, education level, and geographic region, with eligibility restricted to Finnish-speaking citizens aged 18---79 years. Considering missing data on covariates included in the analysis, the final sample size consists of \Sexpr{formatC(nrow(dat), format = "d", big.mark = ",")} respondents, corresponding to a completion rate of approximately 20.6 percent. While online panels are not probability samples, stratification and quota-based recruitment ensure close correspondence with the Finnish adult population on key sociodemographic dimensions, making the data suitable for inference about mass public opinion in a welfare-state context.
+Data collection was carried out by a professional market research company (Taloustutkimus Ltd) using a pre-recruited online panel of approximately 40,000 Finnish citizens. To reach the target sample size, 10,105 invitations were distributed to panel members. The sample was stratified to ensure balance across gender, age, education level, and geographic region, with eligibility restricted to Finnish-speaking citizens aged 18---79 years. Considering missing data on covariates included in the analysis, the final sample size consists of \Sexpr{formatC(nrow(dat), format = "d", big.mark = ",")} respondents. While online panels are not probability samples, stratification and quota-based recruitment ensure close correspondence with the Finnish adult population on key sociodemographic dimensions, making the data suitable for inference about mass public opinion in a welfare-state context.
 
 The experimental module employed a randomized between-subjects design focused on framing effects. Respondents were randomly assigned to one of three conditions: a control condition and two treatment conditions that varied only in how the decision context was framed. All respondents received an identical clinical vignette describing a new oncology medicine characterized by high cost, uncertain benefit, and limited patient eligibility (\autoref{tab:decision_task}). The vignette was drafted based on a published assessment by the Council for Choices in Health Care in Finland (COHERE Finland), with similar decision options that are used by their recommendations. COHERE, working in conjunction with the Ministry of Social Affairs and Health, only issues recommendations on including or excluding health technologies in the range of public health services. Decisions on reimbursement for outpatient medicines are conducted by the Pharmaceutical Pricing Board, also working in conjunction with the Ministry of Social Affairs and Health, and for inpatient medicines, the ultimate decision lies with hospitals. The framing manipulation consisted solely of additional information presented between the vignette and the decision task, allowing differences in responses to be attributed to framing rather than to substantive informational differences.
 
@@ -260,7 +278,7 @@ The experimental module employed a randomized between-subjects design focused on
 \setlength{\tabcolsep}{6pt}
 \renewcommand{\arraystretch}{1.2}
 
-\scalebox{0.7}{%
+\scalebox{0.6}{%
 \begin{tabular}{|p{2.1cm}|p{4.2cm}|p{4.2cm}|p{4.2cm}|}
 \hline
  & \textbf{Group A (rule-of-rescue frame)} & \textbf{Group B (health maximisation frame)} & \textbf{Group C (control)} \\
@@ -300,7 +318,7 @@ Please choose the option that best reflects your opinion.
 
 Following the vignette and framing manipulation, respondents were asked which decision regarding the medicine's use they would find acceptable. Response categories captured increasing levels of cost containment: unconditional public funding, conditional funding tied to price reductions, rejection of funding, and an explicit ``I don't know'' option (n=\Sexpr{as.numeric(table(dat$outcome)["I don't know"])}). These categories map directly onto the theoretical expectations derived from prospect theory, as unconditional funding represents the most risk-acceptant position, conditional funding an intermediate position, and rejection the most risk-averse position.
 
-To estimate the effect of framing on policy preferences, we model respondents' choices using an ordinal logistic regression, reflecting the ordered structure of the outcome variable (\autoref{eq:ordinal_model}). The key independent variable is the framing condition, operationalized as indicators for the rule-of-rescue frame (n=\Sexpr{as.numeric(table(dat$Frame)["Loss (rescue) frame"])}) and the health maximisation (utility-maximizing) frame (n=\Sexpr{as.numeric(table(dat$Frame)["Gains (health maximisation) frame"])}), with the control condition as the reference category (n=\Sexpr{as.numeric(table(dat$Frame)["Control"])}). The specification also includes demographic and socioeconomic covariates commonly associated with healthcare attitudes: gender, age, and income group, as well as indicators capturing health-related exposure, including eligibility for reimbursement of medicines and self-reported medicine expenditures. All models are estimated with survey weights to preserve population representativeness.
+To estimate the effect of framing on policy preferences, we model respondents' choices using an ordinal logistic regression, reflecting the ordered structure of the outcome variable (\autoref{eq:ordinal_model}).\footnote{As a robustness check, we also estimate a multinomial logit model that relaxes the ordinality assumption. This is useful because, although the substantive response options can be ordered from outright rejection to unconditional public funding, the ``I don't know'' (n=\Sexpr{as.numeric(table(dat$outcome)["I don't know"])}) category is not naturally located on that same underlying scale.} The key independent variable is the framing condition, operationalized as indicators for the rule-of-rescue frame (n=\Sexpr{as.numeric(table(dat$Frame)["Loss (rescue) frame"])}) and the health maximisation (utility-maximizing) frame (n=\Sexpr{as.numeric(table(dat$Frame)["Gains (health maximisation) frame"])}), with the control condition as the reference category (n=\Sexpr{as.numeric(table(dat$Frame)["Control"])}). The specification also includes demographic and socioeconomic covariates commonly associated with healthcare attitudes: gender, age, and income group, as well as indicators capturing health-related exposure, including eligibility for reimbursement of medicines and self-reported medicine expenditures. All models are estimated with survey weights to preserve population representativeness.
 
 
 
@@ -316,20 +334,21 @@ Formally, the estimated model can be written as:
 \label{eq:ordinal_model}
 \end{equation}
 
-where $Y_i$ denotes respondent $i$’s preferred funding decision, ordered from outright rejection to unconditional public funding; $\tau_j$ represents threshold parameters; $\text{LossRescue}_i$ and $\text{GainsHealthMax}_i$ indicate assignment to the loss-framed and gain-framed conditions, respectively; and $\mathbf{X}_i$ is a vector of individual-level covariates including gender, age, income group, health status indicators, and medicine expenditures. \autoref{eq:ordinal_model} therefore estimates how framing shifts the latent propensity to favor more restrictive funding positions, holding observed characteristics constant.
-
+where $Y_i$ denotes respondent $i$’s preferred funding decision, ordered from outright rejection to unconditional public funding; $\tau_j$ represents the threshold parameters; $\text{LossRescue}_i$ and $\text{GainsHealthMax}_i$ indicate assignment to the loss-framed and gain-framed conditions, respectively; and $\mathbf{X}_i$ is a vector of individual-level covariates (gender, age, income group, region, eligibility for Kela medicine reimbursement, and self-reported medicine expenditure). Thus, \autoref{eq:ordinal_model} estimates how framing shifts the latent propensity to favor more permissive rather than more restrictive funding positions, holding observed characteristics constant and applying survey weights.
 
 
 % sum state here
 \begin{figure}[H]
 \centering
 \caption{Frequencies and Densities: Summary Statistics and Covariates Balance}
+\label{fig:summary}
 
-\scalebox{0.7}{%
+
+\scalebox{0.6}{%
 \begin{minipage}{\linewidth}
 \centering
 
-<<summary, fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE, fig.width=4.5, fig.height=5.5, out.width="\\linewidth">>=
+<<summary, fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE, fig.width=5.5, fig.height=6.5, out.width="\\linewidth">>=
 
 print(sum_plot)
 
@@ -337,28 +356,35 @@ print(sum_plot)
 \end{minipage}%
 
 }
-
 \end{figure}
 
-\label{fig:summary}
+
 \vspace{0.25em}
-{\footnotesize \textit{Notes:} The figure summarizes sample composition by experimental condition (Control, Loss/rescue, and Gains/health maximisation). The age panel displays weighted kernel density estimates of respondents' age. The remaining panels report weighted percentages within each framing condition for the covariates used in the main model (\autoref{eq:ordinal_model}). All estimates use survey weights. The close overlap across conditions suggests good covariate balance from random assignment.}
+{\footnotesize \textit{Notes:} The figure summarizes sample composition by experimental condition (Control, Loss/rescue, and Gains/health maximisation). The age panel displays weighted kernel density estimates of respondents' age. The remaining panels report weighted percentages within each framing condition for the covariates used in the main model (\autoref{eq:ordinal_model}). The close overlap across conditions suggests good covariate balance from random assignment.}
 
 
 
 \section{Results}
 
 
-After fitting \autoref{eq:ordinal_model}, we show \autoref{fig:pred} which presents predicted probabilities for the three principal policy preferences across framing conditions (regression table shown in \autoref{tab:ologit-models}). The results reveal clear and systematic framing effects. Holding the clinical vignette, cost information, and decision task constant, respondents exposed to alternative frames shifted their preferred policy responses in substantively meaningful ways.
+After fitting \autoref{eq:ordinal_model}, we show \autoref{fig:pred} which presents predicted probabilities for the three principal policy preferences across framing conditions (regression table shown in \autoref{tab:ologit-models}). The results reveal clear and systematic framing effects: respondents exposed to alternative frames shifted their preferred policy responses in substantively meaningful ways.\footnote{The substantive conclusions are broadly similar across the ordinal and multinomial specifications. In both models, the loss (rescue) frame moves respondents toward more permissive funding positions relative to the control condition. The multinomial estimates further suggest that this pattern is concentrated in higher support for conditional and unconditional funding, whereas the gains (health maximisation) frame is weaker overall and is most clearly associated with lower support for unconditional funding.}
 
 \begin{figure}[H]
 \caption{Framing Effects on Public Support for Funding a High-Cost Cancer Medicine}\label{fig:pred}
+\centering
+
+\scalebox{0.7}{%
+\begin{minipage}{\linewidth}
 \centering
 <<pred, fig.height=5, fig.cap=NULL, echo=FALSE, message=FALSE, warning=FALSE>>=
 
 print(pred_plot)
 
 @
+\end{minipage}%
+
+}
+
 \vspace{0.25em}
 {\footnotesize \textit{Notes:} Points are predicted probabilities from the ordered logistic model (\autoref{eq:ordinal_model}; regression table shown in \autoref{tab:ologit-models}); vertical bars indicate 90\% confidence intervals. The loss (rescue) frame increases support for unconditional funding and reduces outright rejection relative to the control, whereas the gains (health maximisation) frame shifts support toward conditional funding and rejection.}
 \end{figure}
@@ -386,11 +412,11 @@ These findings support our theoretical claim that technocratic delegation does n
 
 Our findings also speak to debates about whether, and to what extent, commonly used prioritisation criteria align with mass preferences, and how far public preferences should in turn guide prioritisation decisions. First, previous studies suggest substantial plurality in mass preferences, including conflicting views and shifts in opinions following deliberation \parencite{vanExel2015QMethodology,ReckersDroog2020CitizensPanel}. Our results align with the view that mass preferences are sensitive to framing \parencite{Desser2013RareDiseaseFraming}, which complicates the question of how they should guide decision-making when assessed through standard survey instruments.
 
-Second, earlier work suggests considerable public opposition to prioritisation when decisions are explicitly cost-based \parencite{Blendon2012}. In contrast, our results suggest robust support for at least some cost considerations: the modal response in every experimental condition is conditional public funding (i.e., coverage contingent on price reduction). One interpretation is that conditionality is normatively attractive as an intermediate position that reconciles solidarity with demands for price moderation. A complementary interpretation is that it reflects a form of status quo bias toward ``conditional'' compromise positions when choices are uncertain and politically charged \parencite{SamuelsonZeckhauser1988StatusQuoBias} {\color{red}(MIKKO can you suggest a good ref here)}. Evidence from citizen forum designs is consistent with this reading, suggesting that participants may be willing to reject coverage of extremely expensive medicines with limited evidence and may also expect more socially accountable pricing from companies \parencite{Bijlmakers2020CitizenForum, BaltussenBijlmakers2025TooExpensive}. More broadly, citizen participation in priority-setting has been increasingly pursued, but in heterogeneous ways and with limited evidence on the impact of these initiatives \parencite{Mitton2009ScopingReview, Manafo2018RapidReview, Razavi2020VulnerableParticipation, Oortwijn2021EDPPartII}. Systematic evidence also suggests that meaningful participation requires genuine influence, adequate deliberative conditions, and accessible information \parencite{ArthurSahaKapilashrami2023}.
+Second, earlier work suggests considerable public opposition to prioritisation when decisions are explicitly cost-based \parencite{Blendon2012}. In contrast, our results suggest robust support for at least some cost considerations: the modal response in every experimental condition is conditional public funding (i.e., coverage contingent on price reduction). One interpretation is that conditionality is normatively attractive as an intermediate position that reconciles solidarity with demands for price moderation. A complementary interpretation is that it reflects a form of status quo bias toward ``conditional'' compromise positions when choices are uncertain and politically charged \parencite{SamuelsonZeckhauser1988StatusQuoBias} {\color{red}(MIKKO can you suggest a good ref here)}. Evidence from citizen forum designs is consistent with this reading, suggesting that participants may be willing to reject coverage of extremely expensive medicines with limited evidence and may also expect more socially accountable pricing from companies \parencite{Bijlmakers2020CitizenForum}. More broadly, citizen participation in priority-setting has been increasingly pursued, but in heterogeneous ways and with limited evidence on the impact of these initiatives \parencite{Mitton2009ScopingReview, Manafo2018RapidReview, Razavi2020VulnerableParticipation, Oortwijn2021EDPPartII}. Systematic evidence also suggests that meaningful participation requires genuine influence, adequate deliberative conditions, and accessible information \parencite{ArthurSahaKapilashrami2023}.
 
 Relatedly, patient and citizen involvement in prioritisation processes is often motivated by efforts to enhance procedural rather than content legitimacy \parencite{Baltussen2021EDPPartI,Oortwijn2021EDPPartII}. The core rationale is that, because consensus on prioritisation criteria is unlikely, decisions may still be accepted if the process is perceived as fair and legitimate \parencite{Daniels2000AccountabilityReasonableness,DanielsVanDerWilt2016HTADeliberative,BaeroeBaltussen2014LegitimateLimitSetting}. Yet empiric evidence on these mechanisms remains limited. Experimental studies on transparency and legitimacy suggest that the relationship is context-bound and can yield both positive and negative effects \parencite{deFineLicht2014PolicyArea, deFineLichtNaurin2014TransparencyLegitimacy, deFineLicht2020JanusTransparency}.
 
-Moreover, real-world rationing debates rarely occur under neutral framing conditions. Competing narratives are advanced by organized interests with unequal communicative resources. The pharmaceutical industry, patient advocacy organizations, professional associations, and public authorities deploy frames strategically to shape interpretation \parencite{Sell2004UsingIdeasStrategically}. Industry lobbying exceeds \$233 million annually in the United States, alongside political engagement and advocacy funding \parencite{Steinbrook2020}. Funded patient organizations frequently participate in coordinated campaigns amplifying rescue-oriented narratives \parencite{Parker2019}, within broader patterns of industry support documented across contexts \parencite{Parker2019,Fabbri2020IndustryFundingPatientOrgs,Mulinari2020IndustryFundingPatientOrgsSweden}. Given the emotional salience of rescue frames in life-threatening conditions, such asymmetries may influence public evaluations of identical evidence. This does not imply that framing is inherently manipulative; rather, it underscores that delegated governance operates within competitive interpretive environments. Institutional safeguards may therefore need to address communicative balance in addition to procedural rigor \parencite{Gabe2012HerceptinCountervailingPowers}.
+Moreover, real-world rationing debates rarely occur under neutral framing conditions. Competing narratives are advanced by organized interests with unequal communicative resources. The pharmaceutical industry, patient advocacy organizations, professional associations, and public authorities deploy frames strategically to shape interpretation \parencite{Sell2004}. Industry lobbying exceeds \$233 million annually in the United States, alongside political engagement and advocacy funding \parencite{Steinbrook2020}. Funded patient organizations frequently participate in coordinated campaigns amplifying rescue-oriented narratives \parencite{Parker2019}, within broader patterns of industry support documented across contexts \parencite{Parker2019,Fabbri2020IndustryFundingPatientOrgs,Mulinari2020IndustryFundingPatientOrgsSweden}. Given the emotional salience of rescue frames in life-threatening conditions, such asymmetries may influence public evaluations of identical evidence. This does not imply that framing is inherently manipulative; rather, it underscores that delegated governance operates within competitive interpretive environments. Institutional safeguards may therefore need to address communicative balance in addition to procedural rigor \parencite{Gabe2012HerceptinCountervailingPowers}.
 
 Several limitations qualify these conclusions. First, the study relies on a single-country sample and a single policy domain, limiting external validity across institutional contexts and disease areas. Cross-national work suggests similar plurality of views across European publics, albeit with differences in the specific positions expressed \parencite{vanExel2015QMethodology}. Finland has also been criticized from within for the lack of explicit prioritisation, while neighboring Nordic countries (notably Sweden and Norway) are more often described as pioneers in articulating national prioritisation principles \parencite{Cappelen2022ResponsibilityNorway, Torkki2022PrioritizationFinland}. Future research could therefore examine whether framing effects are comparable across these institutional settings and assess whether more explicit prioritisation criteria condition perceived legitimacy. Second, the experiment employs a single vignette configuration; framing effects may vary with uncertainty type, budget impact, or perceived deservingness. Third, treatments are brief, which enhances internal validity but may not capture repeated exposure to emotionally saturated messaging or elite cues. Fourth, the outcome is attitudinal rather than behavioral, so downstream political consequences are inferred rather than observed. Finally, although the ordinal logit framework appropriately models ordered responses, psychological mediators such as perceived loss magnitude or moral obligation were not directly measured.
 
@@ -486,9 +512,16 @@ count <- comma(as.numeric(count)) # add comma
 \caption{Framing Effects on Public Support for Funding Expensive Cancer Medicines}
 \label{tab:ologit-models}
 %\setlength{\tabcolsep}{3.5pt} % tighten intercolumn spacing
+
+\scalebox{0.75}{%
+\begin{minipage}{\linewidth}
+\centering
 \input{build/table_model.tex}
+\end{minipage}%
+}
+
 \par\vspace{0.4ex}
-\footnotesize \emph{Notes:} Entries report odds ratios from an ordinal logistic regression. The dependent variable measures respondents' preferred funding decision for a novel, high-cost cancer medicine, ordered from outright rejection to unconditional public funding. The key independent variable captures experimental framing of the decision context. Control variables include gender, age, income group, education, eligibility for Kela medicine reimbursement, and self-reported medicine expenditure. Models are estimated using survey weights. 90\% confidence intervals in parentheses. $^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
+\footnotesize \emph{Notes:} The table reports only the coefficients for the experimental framing conditions; the control condition is the omitted reference category in all comparisons. Entries in the ordinal logit column are odds ratios from the ordinal logistic model (\autoref{eq:ordinal_model}). Entries in the multinomial logit column are relative risk ratios from an equivalent multinomial logit model (same covariates), with ``Reject public funding'' as the baseline outcome. The coefficients should not be compared directly in magnitude across columns, because the ordinal model summarizes shifts over the ordered response scale as a whole, whereas the multinomial model estimates outcome-specific contrasts against the baseline category. All models include controls for gender, age, income group, region, eligibility for Kela medicine reimbursement, and self-reported medicine expenditure. Models are estimated using survey weights. 90\% confidence intervals in parentheses. Statistical significance is evaluated at the 10\% level.\\$^{*}p<0.10$, $^{**}p<0.05$, $^{***}p<0.01$.
 \end{table}
 
 

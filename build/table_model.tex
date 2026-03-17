@@ -1,16 +1,22 @@
-\begin{tabular}{ll}
+\begin{tabular}{lll}
 \hline
-& Ordinal logit \\ \hline
-Loss (rescue) frame (vs. control) & \num{1.738}*** \\
-& [\num{1.510}, \num{1.999}] \\
-Gains (health maximisation) frame (vs. control) & \num{1.107} \\
-& [\num{0.958}, \num{1.279}] \\
-Male (vs. female) & \num{0.782}*** \\
-& [\num{0.695}, \num{0.879}] \\
-Age & \num{1.016}*** \\
-& [\num{1.013}, \num{1.020}] \\
-Eligible for Kela reimbursement & \num{1.062} \\
-& [\num{0.925}, \num{1.219}] \\
-Num.Obs. & \num{1499.000} \\
+& Ordinal logit & Multinomial logit \\ \hline
+Loss (rescue) frame (vs. control) & \num{1.738}*** &  \\
+& [\num{1.510}, \num{1.999}] &  \\
+Gains (health maximisation) frame (vs. control) & \num{1.107} &  \\
+& [\num{0.958}, \num{1.279}] &  \\
+Conditional funding vs. reject: Loss (rescue) frame (vs. control) &  & \num{1.558}** \\
+&  & [\num{1.213}, \num{2.001}] \\
+Conditional funding vs. reject: Gains (health maximisation) frame (vs. control) &  & \num{1.182} \\
+&  & [\num{0.938}, \num{1.488}] \\
+Unconditional funding vs. reject: Loss (rescue) frame (vs. control) &  & \num{1.986}*** \\
+&  & [\num{1.510}, \num{2.611}] \\
+Unconditional funding vs. reject: Gains (health maximisation) frame (vs. control) &  & \num{0.690}* \\
+&  & [\num{0.525}, \num{0.908}] \\
+Don't know vs. reject: Loss (rescue) frame (vs. control) &  & \num{3.328}*** \\
+&  & [\num{2.454}, \num{4.514}] \\
+Don't know vs. reject: Gains (health maximisation) frame (vs. control) &  & \num{1.946}*** \\
+&  & [\num{1.453}, \num{2.607}] \\
+Num.Obs. & 1,499 & 1,499 \\
 \hline
 \end{tabular}

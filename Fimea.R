@@ -176,7 +176,7 @@ model <- polr(outcome ~ Frame +
                 M1_2_1 + # Age
                 income_group + # income
                 # controls
-                M1_9+
+                M1_9+ # region
                 M2_5 + # Have illness that entitles Kela compensation
                 M2_11  # how much spends on medicine
               # M2_6_0 + # Has a long-term illness 
@@ -281,67 +281,136 @@ compare_estimates_ci <- function(est1, ci1, est2, ci2, level = c(0.90, 0.95)) {
 
 ## Table
 
-# Nice labels (edit as needed)
-coef_map <- c(
-  # Frames
-  "FrameLoss (rescue) frame"         = "Loss (rescue) frame (vs. control)",
-  "FrameGains (health maximisation) frame"   = "Gains (health maximisation) frame (vs. control)",  
-  # Gender
-  "M1_1Male"                = "Male (vs. female)",
-  
-  # Age
-  "M1_2_1"                  = "Age",
-  
-  # Income
-  "income_groupMiddle"      = "Income: middle (vs. low)",
-  "income_groupHigh"        = "Income: high (vs. low)",
-  "income_groupOther/Unknown" = "Income: other/unknown",
-  
-  # Region / education (whatever M1_9 actually is)
-  "M1_9"                    = "Region",
-  
-  # Kela compensation
-  "M2_5Yes"                 = "Eligible for Kela reimbursement",
-  
-  # Medicine spending
-  "M2_11mid"                = "Medicine spending: medium",
-  "M2_11high"               = "Medicine spending: high"
-)
-
-
-#dat$Frame <- relevel(factor(dat$Frame), ref = "B")
-
-p_load(MASS, modelsummary, broom, dplyr, tibble)
+p_load(MASS, nnet, modelsummary, broom, dplyr, tibble)
 
 dir.create("build", showWarnings = FALSE, recursive = TRUE)
 
-# true estimation N (complete cases actually used by polr)
-n_obs <- nrow(model.frame(model))
+# estimation sample actually used by polr
+mf <- model.frame(model)
+w_used <- model.weights(mf)
 
-# Create a GOF row to append (modelsummary expects columns named like your model list)
-add_gof <- data.frame(
-  term = "Num.Obs.",
-  `Ordinal logit` = n_obs,
-  check.names = FALSE
+# multinomial logit on the exact same sample
+mf_multinom <- mf %>%
+  dplyr::mutate(
+    outcome = relevel(
+      factor(outcome, ordered = FALSE),
+      ref = "Reject public funding"
+    )
+  )
+
+model.multinomial <- nnet::multinom(
+  outcome ~ Frame +
+    M1_1 +
+    M1_2_1 +
+    income_group +
+    M1_9 +
+    M2_5 +
+    M2_11,
+  data = mf_multinom,
+  weights = w_used,
+  Hess = TRUE,
+  trace = FALSE
 )
 
+# tidy multinomial results manually as relative risk ratios
+z_90 <- qnorm(0.95)
+
+mn_tidy <- broom::tidy(model.multinomial) %>%
+  dplyr::mutate(
+    p.value  = 2 * pnorm(abs(statistic), lower.tail = FALSE),
+    conf.low = estimate - z_90 * std.error,
+    conf.high = estimate + z_90 * std.error,
+    estimate = exp(estimate),
+    conf.low = exp(conf.low),
+    conf.high = exp(conf.high),
+    term = paste0(y.level, ": ", term)
+  ) %>%
+  dplyr::select(term, estimate, conf.low, conf.high, p.value)
+
+model.multinomial.ms <- list(
+  tidy = mn_tidy,
+  glance = data.frame(
+    `Num.Obs.` = nrow(mf_multinom),
+    check.names = FALSE
+  )
+)
+class(model.multinomial.ms) <- "modelsummary_list"
+
+# keep only treatment coefficients
+coef_map <- c(
+  # ordinal logit
+  "FrameLoss (rescue) frame" = "Loss (rescue) frame (vs. control)",
+  "FrameGains (health maximisation) frame" = "Gains (health maximisation) frame (vs. control)",
+  
+  # multinomial: conditional funding vs reject
+  "Conditional funding (if price is reduced): FrameLoss (rescue) frame" =
+    "Conditional funding vs. reject: Loss (rescue) frame (vs. control)",
+  "Conditional funding (if price is reduced): FrameGains (health maximisation) frame" =
+    "Conditional funding vs. reject: Gains (health maximisation) frame (vs. control)",
+  
+  # multinomial: unconditional funding vs reject
+  "Unconditional public funding: FrameLoss (rescue) frame" =
+    "Unconditional funding vs. reject: Loss (rescue) frame (vs. control)",
+  "Unconditional public funding: FrameGains (health maximisation) frame" =
+    "Unconditional funding vs. reject: Gains (health maximisation) frame (vs. control)",
+  
+  # multinomial: don't know vs reject
+  "I don't know: FrameLoss (rescue) frame" =
+    "Don't know vs. reject: Loss (rescue) frame (vs. control)",
+  "I don't know: FrameGains (health maximisation) frame" =
+    "Don't know vs. reject: Gains (health maximisation) frame (vs. control)"
+)
+
+# sample size row
+n_obs <- nrow(mf_multinom)
+
+add_gof <- data.frame(
+  term = "Num.Obs.",
+  `Ordinal logit` = format(n_obs, big.mark = ",", scientific = FALSE, trim = TRUE),
+  `Multinomial logit` = format(n_obs, big.mark = ",", scientific = FALSE, trim = TRUE),
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+p_load(dyplr)
+
+ord_tidy <- broom::tidy(model) %>%
+  dplyr::filter(!grepl("\\|", term)) %>%
+  dplyr::mutate(
+    conf.low = estimate - qnorm(0.95) * std.error,
+    conf.high = estimate + qnorm(0.95) * std.error,
+    p.value = 2 * pnorm(abs(statistic), lower.tail = FALSE),
+    estimate = exp(estimate),
+    conf.low = exp(conf.low),
+    conf.high = exp(conf.high)
+  ) %>%
+  dplyr::select(term, estimate, conf.low, conf.high, p.value)
+
+model.ordinal.ms <- list(
+  tidy = ord_tidy,
+  glance = data.frame(
+    `Num.Obs.` = nrow(model.frame(model)),
+    check.names = FALSE
+  )
+)
+class(model.ordinal.ms) <- "modelsummary_list"
+
+
 tab_tex <- modelsummary::msummary(
-  list("Ordinal logit" = model),
+  list(
+    "Ordinal logit" = model.ordinal.ms,
+    "Multinomial logit" = model.multinomial.ms
+  ),
   coef_map = coef_map,
-  exponentiate = TRUE,
   statistic = "conf.int",
-  conf_level = 0.90,
   stars = TRUE,
-  # IMPORTANT: remove the default Num.Obs. row (often becomes sum of weights)
   gof_omit = "Num\\.Obs\\.|Observations|AIC|BIC|Log\\.Lik|RMSE|F|R2|Adj|Within|Between|Std\\.Errors",
   add_rows = add_gof,
   output = "latex_tabular"
 )
 
 writeLines(enc2utf8(as.character(tab_tex)), "build/table_model.tex", useBytes = TRUE)
-
-## ---- 
-
+## ----
 
 
 
@@ -525,7 +594,8 @@ p_age <- ggplot2::ggplot(
   shrink_theme +
   ggplot2::theme(
     legend.position = "bottom",
-    legend.text = ggplot2::element_text(size = 5.5)
+    legend.text = ggplot2::element_text(size = 5.5),
+    axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 4))
   )
 
 wprop_by_frame <- function(df, var, wvar = "PAINOKERROIN") {
@@ -575,7 +645,7 @@ p_region <- make_panel("Region", 28)
 sum_plot <- (p_gender | p_income) /
   (p_kela   | p_spend)  /
   (p_region)            /
-  (p_age)
+  (patchwork::free(p_age, side = "l"))
 
 ## ----
 
