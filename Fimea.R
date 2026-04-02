@@ -412,6 +412,19 @@ tab_tex <- modelsummary::msummary(
 writeLines(enc2utf8(as.character(tab_tex)), "build/table_model.tex", useBytes = TRUE)
 ## ----
 
+p_load(flextable)
+tab_word <- modelsummary::msummary(
+  list(
+    "Ordinal logit" = model.ordinal.ms,
+    "Multinomial logit" = model.multinomial.ms
+  ),
+  coef_map = coef_map,
+  statistic = "conf.int",
+  stars = TRUE,
+  gof_omit = "Num\\.Obs\\.|Observations|AIC|BIC|Log\\.Lik|RMSE|F|R2|Adj|Within|Between|Std\\.Errors",
+  add_rows = add_gof,
+  output = "flextable"
+)
 
 
 ## ---- summary_table
