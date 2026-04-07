@@ -176,6 +176,19 @@ knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
 
 {\noindent\bf AI statement:} Artificial intelligence tool Microsoft Copilot was used to support language editing, proofreading, and minor editorial refinement. After using this tool, the authors reviewed and edited the content as needed and take full responsibility for the content of the publication.
 
+\vspace{1em}
+
+{\noindent\bf Conflict of interests:} No conflict of interest.
+
+
+\vspace{1em}
+
+{\noindent\bf Funding:} No funding to declare.
+
+\vspace{1em}
+
+{\noindent\bf Running title:} Delegation, Framing, and Mass Preferences.
+
 \clearpage
 \pagestyle{plain}
 \pagenumbering{arabic}
