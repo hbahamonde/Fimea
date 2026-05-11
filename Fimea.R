@@ -151,6 +151,26 @@ dat$M2_13_binary <- ifelse(
 
 dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems"))
 
+# Order of the Don't know:
+dat <- dat %>%
+  mutate(
+    outcome_ord = case_when(
+      outcome == "Reject public funding" ~ "Reject public funding",
+      outcome == "Conditional funding (if price is reduced)" ~ "Conditional funding (if price is reduced)",
+      outcome == "Unconditional public funding" ~ "Unconditional public funding",
+      outcome == "I don't know" ~ NA_character_
+    ),
+    outcome_ord = factor(
+      outcome_ord,
+      levels = c(
+        "Reject public funding",
+        "Conditional funding (if price is reduced)",
+        "Unconditional public funding"
+      ),
+      ordered = TRUE
+    )
+  )
+
 # models
 
 # “rule of rescue”
@@ -170,24 +190,20 @@ dat$M2_13_binary <- factor(dat$M2_13_binary, levels = c("no_problems", "problems
 p_load(MASS)
 # Ordered Logistic or Probit Regression
 dat <- droplevels(dat)
-model <- polr(outcome ~ Frame + 
-                # must have
-                M1_1 + # Gender
-                M1_2_1 + # Age
-                income_group + # income
-                # controls
-                M1_9+ # region
-                M2_5 + # Have illness that entitles Kela compensation
-                M2_11  # how much spends on medicine
-              # M2_6_0 + # Has a long-term illness 
-              # M1_3 +  # marital status 
-              #M2_2 + # Illness that affect function to work
-              # M1_5 + # Occupation (includes retired)
-              , 
-              data = dat, 
-              method = c("logistic"), # probit / logistic // probit was giving me predictions OUTSIDE of the range of the C.I.
-              Hess = TRUE,
-              weights = PAINOKERROIN)
+model <- polr(
+  outcome_ord ~ Frame +
+    M1_1 +
+    M1_2_1 +
+    income_group +
+    M1_9 +
+    M2_5 +
+    M2_11,
+  data = dat,
+  method = "logistic",
+  Hess = TRUE,
+  weights = PAINOKERROIN
+  )
+
 # working model
 # model <- polr(outcome ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE, weights = PAINOKERROIN)
 # summary(model)
@@ -220,14 +236,12 @@ pred_plot <- ggplot(predicted_probs,
     values = c(
       "Reject public funding" = "red",
       "Conditional funding (if price is reduced)" = "goldenrod2",
-      "Unconditional public funding" = "green",
-      "I don't know" = "gray"
+      "Unconditional public funding" = "green"
     ),
     breaks = c(
       "Reject public funding",
       "Conditional funding (if price is reduced)",
-      "Unconditional public funding",
-      "I don't know"
+      "Unconditional public funding"
     ),
     labels = function(x) stringr::str_wrap(x, width = 70)
   ) +
@@ -289,25 +303,18 @@ dir.create("build", showWarnings = FALSE, recursive = TRUE)
 mf <- model.frame(model)
 w_used <- model.weights(mf)
 
-# multinomial logit on the exact same sample
-mf_multinom <- mf %>%
-  dplyr::mutate(
-    outcome = relevel(
-      factor(outcome, ordered = FALSE),
-      ref = "Reject public funding"
-    )
-  )
-
+# multinomial logit (I removed “I don’t know” from the ordinal model but will keep it in the multinomial model below)
 model.multinomial <- nnet::multinom(
-  outcome ~ Frame +
+  relevel(factor(outcome, ordered = FALSE), ref = "Reject public funding") ~
+    Frame +
     M1_1 +
     M1_2_1 +
     income_group +
     M1_9 +
     M2_5 +
     M2_11,
-  data = mf_multinom,
-  weights = w_used,
+  data = dat,
+  weights = PAINOKERROIN,
   Hess = TRUE,
   trace = FALSE
 )
@@ -330,7 +337,7 @@ mn_tidy <- broom::tidy(model.multinomial) %>%
 model.multinomial.ms <- list(
   tidy = mn_tidy,
   glance = data.frame(
-    `Num.Obs.` = nrow(mf_multinom),
+    `Num.Obs.` = nrow(model.frame(model.multinomial)),
     check.names = FALSE
   )
 )
@@ -361,18 +368,19 @@ coef_map <- c(
     "Don't know vs. reject: Gains (health maximisation) frame (vs. control)"
 )
 
-# sample size row
-n_obs <- nrow(mf_multinom)
+# sample size rows: ordinal excludes "I don't know"; multinomial keeps it
+n_obs_ord <- nrow(model.frame(model))
+n_obs_mn  <- nrow(model.frame(model.multinomial))
 
 add_gof <- data.frame(
   term = "Num.Obs.",
-  `Ordinal logit` = format(n_obs, big.mark = ",", scientific = FALSE, trim = TRUE),
-  `Multinomial logit` = format(n_obs, big.mark = ",", scientific = FALSE, trim = TRUE),
+  `Ordinal logit` = format(n_obs_ord, big.mark = ",", scientific = FALSE, trim = TRUE),
+  `Multinomial logit` = format(n_obs_mn, big.mark = ",", scientific = FALSE, trim = TRUE),
   check.names = FALSE,
   stringsAsFactors = FALSE
 )
 
-p_load(dyplr)
+p_load(dplyr)
 
 ord_tidy <- broom::tidy(model) %>%
   dplyr::filter(!grepl("\\|", term)) %>%

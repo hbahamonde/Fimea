@@ -371,7 +371,7 @@ Formally, the estimated model can be written as:
 \label{eq:ordinal_model}
 \end{equation}
 
-where $Y_i$ denotes respondent $i$’s preferred funding decision, ordered from outright rejection to unconditional public funding; $\tau_j$ represents the threshold parameters; $\text{LossRescue}_i$ and $\text{GainsHealthMax}_i$ indicate assignment to the loss-framed and gain-framed conditions, respectively; and $\mathbf{X}_i$ is a vector of individual-level covariates (gender, age, income group, region, eligibility for Kela medicine reimbursement, and self-reported medicine expenditure). Thus, \autoref{eq:ordinal_model} estimates how framing shifts the latent propensity to favor more permissive rather than more restrictive funding positions, holding observed characteristics constant and applying survey weights.
+where $Y_i$ denotes respondent $i$’s preferred funding decision among the three substantive options, ordered from outright rejection to unconditional public funding; $\tau_j$ represents the threshold parameters; $\text{LossRescue}_i$ and $\text{GainsHealthMax}_i$ indicate assignment to the loss-framed and gain-framed conditions, respectively; and $\mathbf{X}_i$ is a vector of individual-level covariates (gender, age, income group, region, eligibility for Kela medicine reimbursement, and self-reported medicine expenditure). Thus, \autoref{eq:ordinal_model} estimates how framing shifts the latent propensity to favor more permissive rather than more restrictive funding positions, holding observed characteristics constant and applying survey weights.
 
 
 % sum state here
@@ -408,7 +408,7 @@ where $Y_i$ denotes respondent $i$’s preferred funding decision, ordered from 
 \section{Results}
 
 
-After fitting \autoref{eq:ordinal_model}, we show \autoref{fig:pred} which presents predicted probabilities for the three principal policy preferences across framing conditions (regression table shown in \autoref{tab:ologit-models}). The results reveal clear and systematic framing effects: respondents exposed to alternative frames shifted their preferred policy responses in substantively meaningful ways.\footnote{The substantive conclusions are broadly similar across the ordinal and multinomial specifications. In both models, the loss (rescue) frame moves respondents toward more permissive funding positions relative to the control condition. The multinomial estimates further suggest that this pattern is concentrated in higher support for conditional and unconditional funding, whereas the gains (health maximisation) frame is weaker overall and is most clearly associated with lower support for unconditional funding.}
+After fitting \autoref{eq:ordinal_model}, we show \autoref{fig:pred} which presents predicted probabilities for the three principal policy preferences across framing conditions (regression table shown in \autoref{tab:ologit-models}). The results reveal clear and systematic framing effects: respondents exposed to alternative frames shifted their preferred policy responses in substantively meaningful ways.\footnote{The substantive conclusions are broadly similar across specifications. The ordinal model suggests that the loss (rescue) frame shifts respondents toward more permissive funding positions, whereas the gains (health maximisation) frame shifts them toward more restrictive positions. The multinomial model points in the same direction: the loss frame increases relative support for conditional and unconditional funding compared with rejection, while the gains frame is most clearly associated with lower relative support for unconditional funding. Both frames also increase ``I don't know'' responses relative to rejection, suggesting some increase in expressed uncertainty.}
 
 \begin{figure}[H]
 \caption{Framing Effects on Public Support for Funding a High-Cost Cancer Medicine}\label{fig:pred}
@@ -500,7 +500,7 @@ Overall, the evidence suggests that even under technocratic delegation, distribu
 \begin{center}
 \vspace*{\stretch{1}}
 \dotfill
-\dotfill {\huge {\bf Word count}: 6,562} \dotfill
+\dotfill {\huge {\bf Word count}: 6,607} \dotfill
 \dotfill
 \vspace*{\stretch{1}}
 \end{center}
