@@ -163,9 +163,17 @@ knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
 \vspace*{0.3cm}
 \centerline{\bf {\color{red}PLEASE DO NOT CIRCULATE}.}
 
+\providecommand{\keywords}[1]{%
+  \begin{center}
+  \parbox{0.9\textwidth}{%
+  \centering
+  \textbf{\textit{Keywords---}} #1%
+  }
+  \end{center}
+}
+
 \vspace*{0.5cm}
-\centerline{\providecommand{\keywords}[1]{\textbf{\textit{Keywords---}} #1}
-\keywords{framing; rationing; delegation; oncology; reimbursement; preferences; Finland.}}
+\keywords{choice behavior; health priorities; resource allocation; antineoplastic agents; high-cost technology; reimbursement; Finland.}
 
 \clearpage
 \thispagestyle{empty}
