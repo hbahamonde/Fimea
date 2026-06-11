@@ -160,8 +160,8 @@ knitr::read_chunk('/Users/hectorbahamonde/research/Fimea/Fimea.R')
 \centerline{{\bf Abstract length}: \Sexpr{abstract.c.l} words.}
 \vspace*{0.3cm}
 
-\vspace*{0.3cm}
-\centerline{\bf {\color{red}PLEASE DO NOT CIRCULATE}.}
+%\vspace*{0.3cm}
+%\centerline{\bf {\color{red}PLEASE DO NOT CIRCULATE}.}
 
 \providecommand{\keywords}[1]{%
   \begin{center}
