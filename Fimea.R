@@ -319,6 +319,95 @@ model.multinomial <- nnet::multinom(
   trace = FALSE
 )
 
+#
+# Figure 2 analogue from the multinomial model (including "I don't know")
+p_load(marginaleffects)
+
+# Use the same covariate profile as ggpredict() in Figure 2: factor
+# covariates at their reference/modal categories and age at its weighted mean.
+multinomial_prediction_grid <- marginaleffects::datagrid(
+  model = model.multinomial,
+  Frame = levels(model.frame(model.multinomial)$Frame),
+  M1_2_1 = weighted.mean(
+    model.frame(model.multinomial)$M1_2_1,
+    model.multinomial$weights,
+    na.rm = TRUE
+  )
+)
+
+multinomial_predicted_probs <- marginaleffects::predictions(
+  model.multinomial,
+  newdata = multinomial_prediction_grid,
+  conf_level = 0.95
+) %>%
+  as.data.frame() %>%
+  dplyr::mutate(
+    response.level = factor(
+      as.character(group),
+      levels = c(
+        "Reject public funding",
+        "Conditional funding (if price is reduced)",
+        "Unconditional public funding",
+        "I don't know"
+      )
+    )
+  )
+
+multinomial_dodge <- position_dodge(width = 0.3)
+
+pred_plot_multinomial <- ggplot(
+  multinomial_predicted_probs,
+  aes(
+    x = Frame,
+    y = estimate,
+    color = response.level,
+    group = response.level
+  )
+) +
+  geom_pointrange(
+    aes(ymin = conf.low, ymax = conf.high),
+    position = multinomial_dodge
+  ) +
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      "Reject public funding" = "red",
+      "Conditional funding (if price is reduced)" = "goldenrod2",
+      "Unconditional public funding" = "green",
+      "I don't know" = "steelblue4"
+    ),
+    breaks = c(
+      "Reject public funding",
+      "Conditional funding (if price is reduced)",
+      "Unconditional public funding",
+      "I don't know"
+    ),
+    labels = function(x) stringr::str_wrap(x, width = 70)
+  ) +
+  coord_flip() +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 8),
+    legend.key.height = unit(0.4, "cm"),
+    legend.box.spacing = unit(0.3, "cm"),
+    aspect.ratio = 1,
+    panel.border = element_rect(fill = NA, linewidth = 0.8)
+  ) +
+  guides(colour = guide_legend(ncol = 1)) +
+  labs(x = "Frame", y = "Predicted probabilities")
+
+print(pred_plot_multinomial)
+
+ggsave(
+  "build/figure2_multinomial.pdf",
+  plot = pred_plot_multinomial,
+  width = 7.5,
+  height = 5.5
+)
+
 # tidy multinomial results manually as relative risk ratios
 z_90 <- qnorm(0.95)
 
@@ -667,6 +756,108 @@ sum_plot <- (p_gender | p_income) /
   (p_kela   | p_spend)  /
   (p_region)            /
   (patchwork::free(p_age, side = "l"))
+
+## ----
+
+
+## Revise and Resubmit
+
+## ---- raw_outcome_distribution_by_frame ----
+
+
+# Plot that shows distribution of answers, includes DK's, by treatment arm.
+pacman::p_load(dplyr, tidyr, forcats, ggplot2, stringr, scales, tibble)
+
+outcome_by_frame <- dat %>%
+  dplyr::filter(!is.na(Frame), !is.na(outcome)) %>%
+  dplyr::mutate(
+    Frame = factor(Frame, levels = levels(dat$Frame)),
+    outcome = factor(outcome, levels = levels(dat$outcome), ordered = FALSE)
+  ) %>%
+  dplyr::count(Frame, outcome, .drop = FALSE, name = "n") %>%
+  dplyr::group_by(Frame) %>%
+  dplyr::mutate(
+    frame_n = sum(n),
+    percent = 100 * n / frame_n
+  ) %>%
+  dplyr::ungroup()
+
+outcome_dodge <- ggplot2::position_dodge(width = 0.82)
+
+raw_outcome_plot <- ggplot2::ggplot(
+  outcome_by_frame,
+  ggplot2::aes(x = outcome, y = percent, fill = Frame)
+) +
+  ggplot2::geom_col(
+    position = outcome_dodge,
+    width = 0.74,
+    color = "white",
+    linewidth = 0.25
+  ) +
+  ggplot2::geom_text(
+    ggplot2::aes(
+      y = percent + 1,
+      label = sprintf("%.1f%% (n=%d)", percent, n)
+    ),
+    position = outcome_dodge,
+    hjust = 0,
+    size = 3
+  ) +
+  ggplot2::coord_flip(clip = "off") +
+  ggplot2::scale_x_discrete(
+    labels = function(x) stringr::str_wrap(x, width = 34),
+    drop = FALSE
+  ) +
+  ggplot2::scale_y_continuous(
+    breaks = seq(0, 60, by = 10),
+    labels = function(x) paste0(x, "%"),
+    expand = ggplot2::expansion(mult = c(0, 0.22))
+  ) +
+  ggplot2::scale_fill_manual(
+    values = c(
+      "Control" = "#7F7F7F",
+      "Loss (rescue) frame" = "#D55E00",
+      "Gains (health maximisation) frame" = "#0072B2"
+    ),
+    drop = FALSE,
+    name = NULL
+  ) +
+  ggplot2::labs(
+    title = "Raw outcome distribution by experimental arm",
+    x = NULL,
+    y = "Respondents within experimental arm",
+    caption = stringr::str_wrap(
+      paste0(
+        "Unweighted percentages; raw n shown in parentheses. "),
+      width = 110
+    )
+  ) +
+  ggplot2::theme_minimal(base_size = 10) +
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(face = "bold"),
+    plot.subtitle = ggplot2::element_text(size = 9),
+    plot.caption = ggplot2::element_text(hjust = 0, size = 7.5, lineheight = 1.05),
+    axis.text.y = ggplot2::element_text(size = 9),
+    panel.grid.major.y = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    legend.position = "bottom",
+    legend.text = ggplot2::element_text(size = 8),
+    plot.margin = ggplot2::margin(8, 42, 8, 8)
+  ) +
+  ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1, byrow = TRUE))
+
+print(raw_outcome_plot)
+
+dir.create("build", showWarnings = FALSE, recursive = TRUE)
+
+ggplot2::ggsave(
+  filename = "build/figure_raw_outcome_by_frame.pdf",
+  plot = raw_outcome_plot,
+  width = 8.2,
+  height = 6,
+  units = "in",
+  device = grDevices::cairo_pdf
+)
 
 ## ----
 
