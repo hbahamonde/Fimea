@@ -1,22 +1,146 @@
 \begin{tabular}{lll}
-\hline
-& Ordinal logit & Multinomial logit \\ \hline
-Loss (rescue) frame (vs. control) & \num{1.495}*** &  \\
-& [\num{1.269}, \num{1.762}] &  \\
-Gains (health maximisation) frame (vs. control) & \num{0.739}** &  \\
-& [\num{0.626}, \num{0.873}] &  \\
-Conditional funding vs. reject: Loss (rescue) frame (vs. control) &  & \num{1.558}** \\
-&  & [\num{1.213}, \num{2.001}] \\
-Conditional funding vs. reject: Gains (health maximisation) frame (vs. control) &  & \num{1.182} \\
-&  & [\num{0.938}, \num{1.488}] \\
-Unconditional funding vs. reject: Loss (rescue) frame (vs. control) &  & \num{1.986}*** \\
-&  & [\num{1.510}, \num{2.611}] \\
-Unconditional funding vs. reject: Gains (health maximisation) frame (vs. control) &  & \num{0.690}* \\
-&  & [\num{0.525}, \num{0.908}] \\
-Don't know vs. reject: Loss (rescue) frame (vs. control) &  & \num{3.328}*** \\
-&  & [\num{2.454}, \num{4.514}] \\
-Don't know vs. reject: Gains (health maximisation) frame (vs. control) &  & \num{1.946}*** \\
-&  & [\num{1.453}, \num{2.607}] \\
-Num.Obs. & 1,258 & 1,499 \\
-\hline
+& Multinomial logit & Ordinal logit \\
+Conditional vs. reject: Intercept & \num{1.914}* &  \\
+& [\num{1.156}, \num{3.169}] &  \\
+Conditional vs. reject: Loss (rescue) frame (ref: control) & \num{1.558}** &  \\
+& [\num{1.156}, \num{2.099}] &  \\
+Conditional vs. reject: Gains (health maximisation) frame (ref: control) & \num{1.182} &  \\
+& [\num{0.898}, \num{1.556}] &  \\
+Conditional vs. reject: Male (ref: female) & \num{1.381}** &  \\
+& [\num{1.087}, \num{1.755}] &  \\
+Conditional vs. reject: Age (years) & \num{1.015}*** &  \\
+& [\num{1.008}, \num{1.022}] &  \\
+Conditional vs. reject: Income: 3001-5000 € (ref: up to 3000 €) & \num{0.818} &  \\
+& [\num{0.613}, \num{1.090}] &  \\
+Conditional vs. reject: Income: 5001+ € (ref: up to 3000 €) & \num{0.599}** &  \\
+& [\num{0.413}, \num{0.870}] &  \\
+Conditional vs. reject: Income: missing/no answer (ref: up to 3000 €) & \num{0.736}+ &  \\
+& [\num{0.515}, \num{1.051}] &  \\
+Conditional vs. reject: Region: Southern Finland (ref: Helsinki-Uusimaa) & \num{0.875} &  \\
+& [\num{0.627}, \num{1.221}] &  \\
+Conditional vs. reject: Region: Western Finland (ref: Helsinki-Uusimaa) & \num{1.048} &  \\
+& [\num{0.757}, \num{1.451}] &  \\
+Conditional vs. reject: Region: Northern and Eastern Finland (ref: Helsinki-Uusimaa) & \num{0.808} &  \\
+& [\num{0.587}, \num{1.111}] &  \\
+Conditional vs. reject: Eligible for Kela reimbursement: yes (ref: no) & \num{0.998} &  \\
+& [\num{0.741}, \num{1.343}] &  \\
+Conditional vs. reject: Medicine expenditure: 300-599 € (ref: 100-299 €) & \num{0.805} &  \\
+& [\num{0.552}, \num{1.173}] &  \\
+Conditional vs. reject: Medicine expenditure: 600 € or more (ref: 100-299 €) & \num{1.267} &  \\
+& [\num{0.719}, \num{2.231}] &  \\
+Conditional vs. reject: Medicine expenditure: up to 100 € (ref: 100-299 €) & \num{0.793} &  \\
+& [\num{0.573}, \num{1.098}] &  \\
+Conditional vs. reject: Medicine expenditure: no prescribed medicines (ref: 100-299 €) & \num{0.598}* &  \\
+& [\num{0.403}, \num{0.888}] &  \\
+Conditional vs. reject: Medicine expenditure: don't know (ref: 100-299 €) & \num{2.073}* &  \\
+& [\num{1.115}, \num{3.855}] &  \\
+Unconditional vs. reject: Intercept & \num{0.605}+ &  \\
+& [\num{0.339}, \num{1.081}] &  \\
+Unconditional vs. reject: Loss (rescue) frame (ref: control) & \num{1.986}*** &  \\
+& [\num{1.433}, \num{2.752}] &  \\
+Unconditional vs. reject: Gains (health maximisation) frame (ref: control) & \num{0.690}* &  \\
+& [\num{0.498}, \num{0.957}] &  \\
+Unconditional vs. reject: Male (ref: female) & \num{1.025} &  \\
+& [\num{0.782}, \num{1.344}] &  \\
+Unconditional vs. reject: Age (years) & \num{1.027}*** &  \\
+& [\num{1.019}, \num{1.036}] &  \\
+Unconditional vs. reject: Income: 3001-5000 € (ref: up to 3000 €) & \num{0.920} &  \\
+& [\num{0.667}, \num{1.270}] &  \\
+Unconditional vs. reject: Income: 5001+ € (ref: up to 3000 €) & \num{0.610}* &  \\
+& [\num{0.397}, \num{0.937}] &  \\
+Unconditional vs. reject: Income: missing/no answer (ref: up to 3000 €) & \num{0.732} &  \\
+& [\num{0.485}, \num{1.104}] &  \\
+Unconditional vs. reject: Region: Southern Finland (ref: Helsinki-Uusimaa) & \num{0.831} &  \\
+& [\num{0.573}, \num{1.204}] &  \\
+Unconditional vs. reject: Region: Western Finland (ref: Helsinki-Uusimaa) & \num{0.623}* &  \\
+& [\num{0.429}, \num{0.905}] &  \\
+Unconditional vs. reject: Region: Northern and Eastern Finland (ref: Helsinki-Uusimaa) & \num{0.609}** &  \\
+& [\num{0.425}, \num{0.874}] &  \\
+Unconditional vs. reject: Eligible for Kela reimbursement: yes (ref: no) & \num{0.953} &  \\
+& [\num{0.684}, \num{1.330}] &  \\
+Unconditional vs. reject: Medicine expenditure: 300-599 € (ref: 100-299 €) & \num{0.909} &  \\
+& [\num{0.597}, \num{1.385}] &  \\
+Unconditional vs. reject: Medicine expenditure: 600 € or more (ref: 100-299 €) & \num{1.193} &  \\
+& [\num{0.637}, \num{2.235}] &  \\
+Unconditional vs. reject: Medicine expenditure: up to 100 € (ref: 100-299 €) & \num{1.088} &  \\
+& [\num{0.755}, \num{1.568}] &  \\
+Unconditional vs. reject: Medicine expenditure: no prescribed medicines (ref: 100-299 €) & \num{0.510}** &  \\
+& [\num{0.317}, \num{0.822}] &  \\
+Unconditional vs. reject: Medicine expenditure: don't know (ref: 100-299 €) & \num{1.743} &  \\
+& [\num{0.879}, \num{3.455}] &  \\
+Don't know vs. reject: Intercept & \num{0.159}*** &  \\
+& [\num{0.084}, \num{0.302}] &  \\
+Don't know vs. reject: Loss (rescue) frame (ref: control) & \num{3.328}*** &  \\
+& [\num{2.315}, \num{4.785}] &  \\
+Don't know vs. reject: Gains (health maximisation) frame (ref: control) & \num{1.946}*** &  \\
+& [\num{1.374}, \num{2.757}] &  \\
+Don't know vs. reject: Male (ref: female) & \num{0.775}+ &  \\
+& [\num{0.582}, \num{1.031}] &  \\
+Don't know vs. reject: Age (years) & \num{1.029}*** &  \\
+& [\num{1.020}, \num{1.038}] &  \\
+Don't know vs. reject: Income: 3001-5000 € (ref: up to 3000 €) & \num{0.963} &  \\
+& [\num{0.684}, \num{1.355}] &  \\
+Don't know vs. reject: Income: 5001+ € (ref: up to 3000 €) & \num{0.411}*** &  \\
+& [\num{0.248}, \num{0.681}] &  \\
+Don't know vs. reject: Income: missing/no answer (ref: up to 3000 €) & \num{1.030} &  \\
+& [\num{0.688}, \num{1.543}] &  \\
+Don't know vs. reject: Region: Southern Finland (ref: Helsinki-Uusimaa) & \num{0.892} &  \\
+& [\num{0.602}, \num{1.321}] &  \\
+Don't know vs. reject: Region: Western Finland (ref: Helsinki-Uusimaa) & \num{1.024} &  \\
+& [\num{0.701}, \num{1.494}] &  \\
+Don't know vs. reject: Region: Northern and Eastern Finland (ref: Helsinki-Uusimaa) & \num{0.517}** &  \\
+& [\num{0.349}, \num{0.766}] &  \\
+Don't know vs. reject: Eligible for Kela reimbursement: yes (ref: no) & \num{1.208} &  \\
+& [\num{0.857}, \num{1.703}] &  \\
+Don't know vs. reject: Medicine expenditure: 300-599 € (ref: 100-299 €) & \num{1.404} &  \\
+& [\num{0.893}, \num{2.207}] &  \\
+Don't know vs. reject: Medicine expenditure: 600 € or more (ref: 100-299 €) & \num{1.115} &  \\
+& [\num{0.555}, \num{2.239}] &  \\
+Don't know vs. reject: Medicine expenditure: up to 100 € (ref: 100-299 €) & \num{1.438}+ &  \\
+& [\num{0.958}, \num{2.159}] &  \\
+Don't know vs. reject: Medicine expenditure: no prescribed medicines (ref: 100-299 €) & \num{1.199} &  \\
+& [\num{0.731}, \num{1.968}] &  \\
+Don't know vs. reject: Medicine expenditure: don't know (ref: 100-299 €) & \num{7.764}*** &  \\
+& [\num{4.018}, \num{15.003}] &  \\
+Loss (rescue) frame (ref: control) &  & \num{1.495}*** \\
+&  & [\num{1.229}, \num{1.818}] \\
+Gains (health maximisation) frame (ref: control) &  & \num{0.739}** \\
+&  & [\num{0.606}, \num{0.901}] \\
+Male (ref: female) &  & \num{0.941} \\
+&  & [\num{0.800}, \num{1.107}] \\
+Age (years) &  & \num{1.017}*** \\
+&  & [\num{1.011}, \num{1.022}] \\
+Income: 3001-5000 € (ref: up to 3000 €) &  & \num{0.994} \\
+&  & [\num{0.821}, \num{1.204}] \\
+Income: 5001+ € (ref: up to 3000 €) &  & \num{0.771}+ \\
+&  & [\num{0.587}, \num{1.013}] \\
+Income: missing/no answer (ref: up to 3000 €) &  & \num{0.877} \\
+&  & [\num{0.682}, \num{1.127}] \\
+Region: Southern Finland (ref: Helsinki-Uusimaa) &  & \num{0.884} \\
+&  & [\num{0.705}, \num{1.108}] \\
+Region: Western Finland (ref: Helsinki-Uusimaa) &  & \num{0.716}** \\
+&  & [\num{0.575}, \num{0.891}] \\
+Region: Northern and Eastern Finland (ref: Helsinki-Uusimaa) &  & \num{0.722}** \\
+&  & [\num{0.579}, \num{0.900}] \\
+Eligible for Kela reimbursement: yes (ref: no) &  & \num{0.962} \\
+&  & [\num{0.793}, \num{1.167}] \\
+Medicine expenditure: 300-599 € (ref: 100-299 €) &  & \num{0.986} \\
+&  & [\num{0.767}, \num{1.267}] \\
+Medicine expenditure: 600 € or more (ref: 100-299 €) &  & \num{1.053} \\
+&  & [\num{0.758}, \num{1.462}] \\
+Medicine expenditure: up to 100 € (ref: 100-299 €) &  & \num{1.149} \\
+&  & [\num{0.918}, \num{1.436}] \\
+Medicine expenditure: no prescribed medicines (ref: 100-299 €) &  & \num{0.702}* \\
+&  & [\num{0.522}, \num{0.942}] \\
+Medicine expenditure: don't know (ref: 100-299 €) &  & \num{1.150} \\
+&  & [\num{0.821}, \num{1.609}] \\
+Threshold: reject | conditional funding &  & \num{-1.194} \\
+&  & [\num{-1.562}, \num{-0.826}] \\
+Threshold: conditional | unconditional funding &  & \num{1.706} \\
+&  & [\num{1.334}, \num{2.078}] \\
+Num.Obs. & 1,499 & 1,258 \\
+Log.Lik. & -3490.07 & -2239.96 \\
+AIC & 7082.14 & 4515.92 \\
+BIC & 7387.61 & 4620.26 \\
+Survey weights & Yes (PAINOKERROIN) & Yes (PAINOKERROIN) \\
 \end{tabular}

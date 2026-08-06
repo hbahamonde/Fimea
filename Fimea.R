@@ -204,6 +204,38 @@ model <- polr(
   weights = PAINOKERROIN
   )
 
+# Test the proportional-odds (parallel-slopes) assumption used by polr.
+# nominal_test() fits a separate non-proportional effect for each term;
+# a small p-value indicates that the common-slope restriction is violated.
+p_load(ordinal)
+
+model.proportional_odds_test <- ordinal::clm(
+  formula = formula(model),
+  data = dat,
+  weights = PAINOKERROIN,
+  link = "logit",
+  Hess = TRUE
+)
+
+proportional_odds_test <- ordinal::nominal_test(
+  model.proportional_odds_test
+)
+print(proportional_odds_test)
+
+proportional_odds_test_table <- data.frame(
+  term = rownames(proportional_odds_test),
+  as.data.frame(proportional_odds_test, check.names = FALSE),
+  row.names = NULL,
+  check.names = FALSE
+)
+
+dir.create("build", showWarnings = FALSE, recursive = TRUE)
+utils::write.csv(
+  proportional_odds_test_table,
+  "build/proportional_odds_test.csv",
+  row.names = FALSE
+)
+
 # working model
 # model <- polr(outcome ~ Frame + M1_1 + M1_2_1 + M1_3 + M1_5, data = dat, Hess = TRUE, weights = PAINOKERROIN)
 # summary(model)
@@ -353,6 +385,22 @@ multinomial_predicted_probs <- marginaleffects::predictions(
     )
   )
 
+# Exact values underlying Figure 2 (also exported below as a Word table).
+figure2_probability_table <- multinomial_predicted_probs %>%
+  dplyr::transmute(
+    Frame = as.character(Frame),
+    Outcome = as.character(response.level),
+    `Predicted probability` = round(estimate, 2),
+    `95% CI lower` = round(conf.low, 2),
+    `95% CI upper` = round(conf.high, 2)
+  )
+
+utils::write.csv(
+  figure2_probability_table,
+  "build/table_figure2_predicted_probabilities.csv",
+  row.names = FALSE
+)
+
 multinomial_dodge <- position_dodge(width = 0.3)
 
 pred_plot_multinomial <- ggplot(
@@ -408,14 +456,255 @@ ggsave(
   height = 5.5
 )
 
-# tidy multinomial results manually as relative risk ratios
-z_90 <- qnorm(0.95)
+# Word-ready numerical table supporting Figure 2.
+# Running the Figure 2 section therefore produces both the figure and the
+# table of exact predicted probabilities requested by the reviewer.
+p_load(flextable, officer)
 
+figure2_probability_word_data <- figure2_probability_table %>%
+  dplyr::transmute(
+    Frame,
+    Outcome,
+    `Predicted probability` = sprintf("%.2f", `Predicted probability`),
+    `95% confidence interval` = sprintf(
+      "[%.2f, %.2f]",
+      `95% CI lower`,
+      `95% CI upper`
+    )
+  )
+
+figure2_probability_word <- flextable::flextable(
+  figure2_probability_word_data
+) %>%
+  flextable::theme_booktabs() %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::fontsize(size = 8.5, part = "all") %>%
+  flextable::bold(part = "header") %>%
+  flextable::align(j = 3:4, align = "center", part = "all") %>%
+  flextable::valign(valign = "center", part = "all") %>%
+  flextable::padding(padding = 3, part = "all") %>%
+  flextable::width(j = 1, width = 1.8) %>%
+  flextable::width(j = 2, width = 2.7) %>%
+  flextable::width(j = 3, width = 1.0) %>%
+  flextable::width(j = 4, width = 1.2) %>%
+  flextable::set_table_properties(
+    layout = "fixed",
+    opts_word = list(split = FALSE, repeat_headers = TRUE)
+  )
+
+flextable::save_as_docx(
+  values = list(figure2_probability_word),
+  path = "build/table_figure2_predicted_probabilities.docx",
+  align = "center"
+)
+
+# Sensitivity figure: full-sample multinomial model versus the ordered-logit
+# model that excludes "I don't know" responses. For a like-for-like comparison,
+# multinomial probabilities for the three funding outcomes are conditional on a
+# substantive response. The "I don't know" panel retains its full-sample
+# probability and therefore contains only the multinomial estimate.
+ordinal_comparison_raw <- marginaleffects::predictions(
+  model,
+  newdata = multinomial_prediction_grid,
+  conf_level = 0.95
+)
+
+multinomial_comparison_raw <- marginaleffects::predictions(
+  model.multinomial,
+  newdata = multinomial_prediction_grid,
+  conf_level = 0.95
+)
+
+# Delta-method transformation of P(Y = k) into
+# P(Y = k | Y != "I don't know") for the three substantive outcomes.
+multinomial_comparison_df <- as.data.frame(multinomial_comparison_raw)
+multinomial_comparison_vcov <- vcov(multinomial_comparison_raw)
+multinomial_comparison_jacobian <- matrix(
+  0,
+  nrow = nrow(multinomial_comparison_df),
+  ncol = nrow(multinomial_comparison_df)
+)
+multinomial_comparison_estimate <- numeric(nrow(multinomial_comparison_df))
+
+for (row_id in seq_len(nrow(multinomial_comparison_df))) {
+  frame_id <- multinomial_comparison_df$Frame[row_id]
+  dk_id <- which(
+    multinomial_comparison_df$Frame == frame_id &
+      as.character(multinomial_comparison_df$group) == "I don't know"
+  )
+
+  if (as.character(multinomial_comparison_df$group[row_id]) == "I don't know") {
+    multinomial_comparison_estimate[row_id] <-
+      multinomial_comparison_df$estimate[row_id]
+    multinomial_comparison_jacobian[row_id, row_id] <- 1
+  } else {
+    substantive_probability <- 1 - multinomial_comparison_df$estimate[dk_id]
+    multinomial_comparison_estimate[row_id] <-
+      multinomial_comparison_df$estimate[row_id] / substantive_probability
+    multinomial_comparison_jacobian[row_id, row_id] <-
+      1 / substantive_probability
+    multinomial_comparison_jacobian[row_id, dk_id] <-
+      multinomial_comparison_df$estimate[row_id] /
+      substantive_probability^2
+  }
+}
+
+multinomial_comparison_transformed_vcov <-
+  multinomial_comparison_jacobian %*%
+  multinomial_comparison_vcov %*%
+  t(multinomial_comparison_jacobian)
+
+multinomial_comparison_se <- sqrt(
+  pmax(diag(multinomial_comparison_transformed_vcov), 0)
+)
+
+comparison_outcome_levels <- c(
+  "Reject public funding",
+  "Conditional funding (if price is reduced)",
+  "Unconditional public funding",
+  "I don't know"
+)
+
+comparison_specification_levels <- c(
+  "Multinomial logit (includes Don't know)",
+  "Ordered logit (excludes Don't know)"
+)
+
+multinomial_comparison_probs <- multinomial_comparison_df %>%
+  dplyr::transmute(
+    Frame,
+    response.level = factor(as.character(group),
+                            levels = comparison_outcome_levels),
+    estimate = multinomial_comparison_estimate,
+    conf.low = pmax(0, estimate - qnorm(0.975) * multinomial_comparison_se),
+    conf.high = pmin(1, estimate + qnorm(0.975) * multinomial_comparison_se),
+    specification = "Multinomial logit (includes Don't know)"
+  )
+
+ordinal_comparison_probs <- as.data.frame(ordinal_comparison_raw) %>%
+  dplyr::transmute(
+    Frame,
+    response.level = factor(as.character(group),
+                            levels = comparison_outcome_levels),
+    estimate,
+    conf.low,
+    conf.high,
+    specification = "Ordered logit (excludes Don't know)"
+  )
+
+model_comparison_probs <- dplyr::bind_rows(
+  multinomial_comparison_probs,
+  ordinal_comparison_probs
+) %>%
+  dplyr::mutate(
+    specification = factor(
+      specification,
+      levels = comparison_specification_levels
+    )
+  )
+
+comparison_facet_labels <- c(
+  "Reject public funding" = "Reject public funding",
+  "Conditional funding (if price is reduced)" =
+    "Conditional funding\n(if price is reduced)",
+  "Unconditional public funding" = "Unconditional public funding",
+  "I don't know" = "I don't know"
+)
+
+comparison_dodge <- position_dodge(width = 0.32)
+comparison_probability_limit <- min(
+  1,
+  ceiling(max(model_comparison_probs$conf.high, na.rm = TRUE) * 20) / 20
+)
+
+pred_plot_model_comparison <- ggplot(
+  model_comparison_probs,
+  aes(
+    x = Frame,
+    y = estimate,
+    color = response.level,
+    shape = specification,
+    group = specification
+  )
+) +
+  geom_pointrange(
+    aes(ymin = conf.low, ymax = conf.high),
+    position = comparison_dodge,
+    linewidth = 0.45
+  ) +
+  facet_wrap(
+    ~ response.level,
+    ncol = 2,
+    labeller = ggplot2::as_labeller(comparison_facet_labels)
+  ) +
+  scale_color_manual(
+    values = c(
+      "Reject public funding" = "red",
+      "Conditional funding (if price is reduced)" = "goldenrod2",
+      "Unconditional public funding" = "green",
+      "I don't know" = "steelblue4"
+    ),
+    guide = "none"
+  ) +
+  scale_shape_manual(
+    name = NULL,
+    values = c(
+      "Multinomial logit (includes Don't know)" = 16,
+      "Ordered logit (excludes Don't know)" = 17
+    )
+  ) +
+  scale_y_continuous(
+    limits = c(0, comparison_probability_limit),
+    breaks = seq(0, comparison_probability_limit, by = 0.10),
+    labels = scales::label_number(accuracy = 0.1),
+    expand = expansion(mult = c(0.01, 0.02))
+  ) +
+  coord_flip() +
+  theme_minimal(base_size = 11) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 8),
+    legend.key.width = unit(0.65, "cm"),
+    legend.box.spacing = unit(0.25, "cm"),
+    strip.text = element_text(face = "bold", size = 9),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(fill = NA, linewidth = 0.7)
+  ) +
+  guides(shape = guide_legend(nrow = 1, byrow = TRUE)) +
+  labs(x = "Frame", y = "Predicted probabilities")
+
+print(pred_plot_model_comparison)
+
+ggsave(
+  "build/figure2_model_comparison.pdf",
+  plot = pred_plot_model_comparison,
+  width = 8.5,
+  height = 6.2
+)
+ggsave(
+  "build/figure2_model_comparison.png",
+  plot = pred_plot_model_comparison,
+  width = 8.5,
+  height = 6.2,
+  dpi = 300
+)
+
+
+# Table
+
+# Full regression table requested by Reviewer 1: all frame coefficients,
+# covariates, multinomial intercepts, ordinal thresholds, sample sizes, fit
+# statistics, weighting details, and 95% confidence intervals.
+z_95 <- qnorm(0.975)
+
+# Multinomial coefficients are reported as relative risk ratios.
 mn_tidy <- broom::tidy(model.multinomial) %>%
   dplyr::mutate(
-    p.value  = 2 * pnorm(abs(statistic), lower.tail = FALSE),
-    conf.low = estimate - z_90 * std.error,
-    conf.high = estimate + z_90 * std.error,
+    p.value = 2 * pnorm(abs(statistic), lower.tail = FALSE),
+    conf.low = estimate - z_95 * std.error,
+    conf.high = estimate + z_95 * std.error,
     estimate = exp(estimate),
     conf.low = exp(conf.low),
     conf.high = exp(conf.high),
@@ -432,54 +721,21 @@ model.multinomial.ms <- list(
 )
 class(model.multinomial.ms) <- "modelsummary_list"
 
-# keep only treatment coefficients
-coef_map <- c(
-  # ordinal logit
-  "FrameLoss (rescue) frame" = "Loss (rescue) frame (vs. control)",
-  "FrameGains (health maximisation) frame" = "Gains (health maximisation) frame (vs. control)",
-  
-  # multinomial: conditional funding vs reject
-  "Conditional funding (if price is reduced): FrameLoss (rescue) frame" =
-    "Conditional funding vs. reject: Loss (rescue) frame (vs. control)",
-  "Conditional funding (if price is reduced): FrameGains (health maximisation) frame" =
-    "Conditional funding vs. reject: Gains (health maximisation) frame (vs. control)",
-  
-  # multinomial: unconditional funding vs reject
-  "Unconditional public funding: FrameLoss (rescue) frame" =
-    "Unconditional funding vs. reject: Loss (rescue) frame (vs. control)",
-  "Unconditional public funding: FrameGains (health maximisation) frame" =
-    "Unconditional funding vs. reject: Gains (health maximisation) frame (vs. control)",
-  
-  # multinomial: don't know vs reject
-  "I don't know: FrameLoss (rescue) frame" =
-    "Don't know vs. reject: Loss (rescue) frame (vs. control)",
-  "I don't know: FrameGains (health maximisation) frame" =
-    "Don't know vs. reject: Gains (health maximisation) frame (vs. control)"
-)
-
-# sample size rows: ordinal excludes "I don't know"; multinomial keeps it
-n_obs_ord <- nrow(model.frame(model))
-n_obs_mn  <- nrow(model.frame(model.multinomial))
-
-add_gof <- data.frame(
-  term = "Num.Obs.",
-  `Ordinal logit` = format(n_obs_ord, big.mark = ",", scientific = FALSE, trim = TRUE),
-  `Multinomial logit` = format(n_obs_mn, big.mark = ",", scientific = FALSE, trim = TRUE),
-  check.names = FALSE,
-  stringsAsFactors = FALSE
-)
-
-p_load(dplyr)
-
+# Ordinal predictor coefficients are odds ratios. Thresholds are retained on
+# their original logit scale because exponentiating cutpoints is not meaningful.
 ord_tidy <- broom::tidy(model) %>%
-  dplyr::filter(!grepl("\\|", term)) %>%
   dplyr::mutate(
-    conf.low = estimate - qnorm(0.95) * std.error,
-    conf.high = estimate + qnorm(0.95) * std.error,
-    p.value = 2 * pnorm(abs(statistic), lower.tail = FALSE),
-    estimate = exp(estimate),
-    conf.low = exp(conf.low),
-    conf.high = exp(conf.high)
+    is_threshold = coef.type == "scale",
+    conf.low = estimate - z_95 * std.error,
+    conf.high = estimate + z_95 * std.error,
+    p.value = dplyr::if_else(
+      is_threshold,
+      NA_real_,
+      2 * pnorm(abs(statistic), lower.tail = FALSE)
+    ),
+    estimate = dplyr::if_else(is_threshold, estimate, exp(estimate)),
+    conf.low = dplyr::if_else(is_threshold, conf.low, exp(conf.low)),
+    conf.high = dplyr::if_else(is_threshold, conf.high, exp(conf.high))
   ) %>%
   dplyr::select(term, estimate, conf.low, conf.high, p.value)
 
@@ -492,11 +748,94 @@ model.ordinal.ms <- list(
 )
 class(model.ordinal.ms) <- "modelsummary_list"
 
+# Human-readable labels for every coefficient and both ordinal thresholds.
+coefficient_labels <- c(
+  "(Intercept)" = "Intercept",
+  "FrameLoss (rescue) frame" = "Loss (rescue) frame (ref: control)",
+  "FrameGains (health maximisation) frame" =
+    "Gains (health maximisation) frame (ref: control)",
+  "M1_1Male" = "Male (ref: female)",
+  "M1_2_1" = "Age (years)",
+  "income_group3001-5000 €" = "Income: 3001-5000 € (ref: up to 3000 €)",
+  "income_group5001+ €" = "Income: 5001+ € (ref: up to 3000 €)",
+  "income_groupMissing/No answer" =
+    "Income: missing/no answer (ref: up to 3000 €)",
+  "M1_9Southern Finland" = "Region: Southern Finland (ref: Helsinki-Uusimaa)",
+  "M1_9Western Finland" = "Region: Western Finland (ref: Helsinki-Uusimaa)",
+  "M1_9Northern and Eastern Finland" =
+    "Region: Northern and Eastern Finland (ref: Helsinki-Uusimaa)",
+  "M2_5Yes" = "Eligible for Kela reimbursement: yes (ref: no)",
+  "M2_11300-599 €" = "Medicine expenditure: 300-599 € (ref: 100-299 €)",
+  "M2_11600 € or more" =
+    "Medicine expenditure: 600 € or more (ref: 100-299 €)",
+  "M2_11All 100 €" = "Medicine expenditure: up to 100 € (ref: 100-299 €)",
+  "M2_11I do not take medicines prescribed by my doctor" =
+    "Medicine expenditure: no prescribed medicines (ref: 100-299 €)",
+  "M2_11I don't know" =
+    "Medicine expenditure: don't know (ref: 100-299 €)",
+  "Reject public funding|Conditional funding (if price is reduced)" =
+    "Threshold: reject | conditional funding",
+  "Conditional funding (if price is reduced)|Unconditional public funding" =
+    "Threshold: conditional | unconditional funding"
+)
+
+multinomial_outcome_labels <- c(
+  "Conditional funding (if price is reduced)" = "Conditional vs. reject",
+  "Unconditional public funding" = "Unconditional vs. reject",
+  "I don't know" = "Don't know vs. reject"
+)
+
+mn_coef_map <- broom::tidy(model.multinomial) %>%
+  dplyr::transmute(
+    term_key = paste0(y.level, ": ", term),
+    term_label = paste0(
+      unname(multinomial_outcome_labels[y.level]),
+      ": ",
+      dplyr::coalesce(unname(coefficient_labels[term]), term)
+    )
+  )
+
+ord_coef_map <- broom::tidy(model) %>%
+  dplyr::transmute(
+    term_key = term,
+    term_label = dplyr::coalesce(unname(coefficient_labels[term]), term)
+  )
+
+# Multinomial rows appear first because it is the main specification; the
+# ordered-logit sensitivity estimates and thresholds follow.
+coef_map <- c(
+  stats::setNames(mn_coef_map$term_label, mn_coef_map$term_key),
+  stats::setNames(ord_coef_map$term_label, ord_coef_map$term_key)
+)
+
+# Fit statistics and weighting information displayed in both output formats.
+n_obs_ord <- nrow(model.frame(model))
+n_obs_mn <- nrow(model.frame(model.multinomial))
+
+add_gof <- data.frame(
+  term = c("Num.Obs.", "Log.Lik.", "AIC", "BIC", "Survey weights"),
+  `Multinomial logit` = c(
+    format(n_obs_mn, big.mark = ",", scientific = FALSE, trim = TRUE),
+    sprintf("%.2f", as.numeric(logLik(model.multinomial))),
+    sprintf("%.2f", AIC(model.multinomial)),
+    sprintf("%.2f", BIC(model.multinomial)),
+    "Yes (PAINOKERROIN)"
+  ),
+  `Ordinal logit` = c(
+    format(n_obs_ord, big.mark = ",", scientific = FALSE, trim = TRUE),
+    sprintf("%.2f", as.numeric(logLik(model))),
+    sprintf("%.2f", AIC(model)),
+    sprintf("%.2f", BIC(model)),
+    "Yes (PAINOKERROIN)"
+  ),
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
 
 tab_tex <- modelsummary::msummary(
   list(
-    "Ordinal logit" = model.ordinal.ms,
-    "Multinomial logit" = model.multinomial.ms
+    "Multinomial logit" = model.multinomial.ms,
+    "Ordinal logit" = model.ordinal.ms
   ),
   coef_map = coef_map,
   statistic = "conf.int",
@@ -509,20 +848,105 @@ tab_tex <- modelsummary::msummary(
 writeLines(enc2utf8(as.character(tab_tex)), "build/table_model.tex", useBytes = TRUE)
 ## ----
 
-p_load(flextable)
-tab_word <- modelsummary::msummary(
-  list(
-    "Ordinal logit" = model.ordinal.ms,
-    "Multinomial logit" = model.multinomial.ms
-  ),
-  coef_map = coef_map,
-  statistic = "conf.int",
-  stars = TRUE,
-  gof_omit = "Num\\.Obs\\.|Observations|AIC|BIC|Log\\.Lik|RMSE|F|R2|Adj|Within|Between|Std\\.Errors",
-  add_rows = add_gof,
-  output = "flextable"
+p_load(flextable, officer)
+
+format_model_cell <- function(estimate, conf.low, conf.high, p.value) {
+  stars <- dplyr::case_when(
+    is.na(p.value) ~ "",
+    p.value < 0.001 ~ "***",
+    p.value < 0.01 ~ "**",
+    p.value < 0.05 ~ "*",
+    p.value < 0.10 ~ "+",
+    TRUE ~ ""
+  )
+  sprintf(
+    "%.3f%s\n[%.3f, %.3f]",
+    estimate,
+    stars,
+    conf.low,
+    conf.high
+  )
+}
+
+mn_word_cells <- mn_tidy %>%
+  dplyr::transmute(
+    term_key = term,
+    `Multinomial logit` = format_model_cell(
+      estimate,
+      conf.low,
+      conf.high,
+      p.value
+    )
+  )
+
+ord_word_cells <- ord_tidy %>%
+  dplyr::transmute(
+    term_key = term,
+    `Ordinal logit` = format_model_cell(
+      estimate,
+      conf.low,
+      conf.high,
+      p.value
+    )
+  )
+
+table_model_word_data <- data.frame(
+  term_key = names(coef_map),
+  Parameter = unname(coef_map),
+  stringsAsFactors = FALSE
+) %>%
+  dplyr::left_join(mn_word_cells, by = "term_key") %>%
+  dplyr::left_join(ord_word_cells, by = "term_key") %>%
+  dplyr::mutate(
+    `Multinomial logit` = dplyr::coalesce(`Multinomial logit`, ""),
+    `Ordinal logit` = dplyr::coalesce(`Ordinal logit`, "")
+  ) %>%
+  dplyr::select(Parameter, `Multinomial logit`, `Ordinal logit`)
+
+table_model_word_data <- dplyr::bind_rows(
+  table_model_word_data,
+  data.frame(
+    Parameter = add_gof$term,
+    `Multinomial logit` = add_gof$`Multinomial logit`,
+    `Ordinal logit` = add_gof$`Ordinal logit`,
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
 )
 
+tab_word <- flextable::flextable(table_model_word_data)
+
+tab_word <- tab_word %>%
+  flextable::theme_booktabs() %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::fontsize(size = 8, part = "all") %>%
+  flextable::bold(part = "header") %>%
+  flextable::align(j = 2:3, align = "center", part = "all") %>%
+  flextable::valign(valign = "center", part = "all") %>%
+  flextable::padding(padding = 2, part = "all") %>%
+  flextable::width(j = 1, width = 6.2) %>%
+  flextable::width(j = 2:3, width = 1.7) %>%
+  flextable::set_table_properties(
+    layout = "fixed",
+    opts_word = list(split = FALSE, repeat_headers = TRUE)
+  )
+
+table_model_section <- officer::prop_section(
+  page_size = officer::page_size(orient = "landscape"),
+  page_margins = officer::page_mar(
+    top = 0.5,
+    bottom = 0.5,
+    left = 0.5,
+    right = 0.5
+  )
+)
+
+flextable::save_as_docx(
+  values = list(tab_word),
+  path = "build/table_model.docx",
+  pr_section = table_model_section,
+  align = "center"
+)
 
 ## ---- summary_table
 p_load(dplyr, modelsummary, tidyr, tibble)
@@ -858,6 +1282,15 @@ ggplot2::ggsave(
   units = "in",
   device = grDevices::cairo_pdf
 )
+
+ggsave(
+  "build/figure_raw_outcome_by_frame.png",
+  plot = raw_outcome_plot,
+  width = 8.2,
+  height = 6,
+  dpi = 300
+)
+
 
 ## ----
 
