@@ -1060,6 +1060,290 @@ writeLines(
 ## ----
 
 
+## ---- table_1OA_unweighted
+
+# Table 1OA: unweighted sensitivity models requested by Reviewer 1.
+# These specifications use the same outcomes, covariates, and weight-eligible
+# estimation sample as the weighted models, but PAINOKERROIN is not applied in
+# model estimation.
+pacman::p_load(
+  MASS,
+  nnet,
+  modelsummary,
+  broom,
+  dplyr,
+  tibble,
+  flextable,
+  officer
+)
+
+dat_unweighted <- dat %>%
+  dplyr::mutate(
+    PAINOKERROIN = suppressWarnings(as.numeric(PAINOKERROIN))
+  ) %>%
+  dplyr::filter(
+    is.finite(PAINOKERROIN),
+    PAINOKERROIN > 0
+  )
+
+model.multinomial.unweighted <- nnet::multinom(
+  relevel(
+    factor(outcome, ordered = FALSE),
+    ref = "Reject public funding"
+  ) ~ Frame + M1_1 + M1_2_1 + income_group + M1_9 + M2_5 + M2_11,
+  data = dat_unweighted,
+  Hess = TRUE,
+  trace = FALSE
+)
+
+model.unweighted <- MASS::polr(
+  outcome_ord ~
+    Frame + M1_1 + M1_2_1 + income_group + M1_9 + M2_5 + M2_11,
+  data = dat_unweighted,
+  method = "logistic",
+  Hess = TRUE
+)
+
+z_95_unweighted <- stats::qnorm(0.975)
+
+# Multinomial coefficients are reported as relative risk ratios.
+mn_unweighted_tidy <- broom::tidy(model.multinomial.unweighted) %>%
+  dplyr::mutate(
+    p.value = 2 * stats::pnorm(abs(statistic), lower.tail = FALSE),
+    conf.low = estimate - z_95_unweighted * std.error,
+    conf.high = estimate + z_95_unweighted * std.error,
+    estimate = exp(estimate),
+    conf.low = exp(conf.low),
+    conf.high = exp(conf.high),
+    term = paste0(y.level, ": ", term)
+  ) %>%
+  dplyr::select(term, estimate, conf.low, conf.high, p.value)
+
+model.multinomial.unweighted.ms <- list(
+  tidy = mn_unweighted_tidy,
+  glance = data.frame(
+    `Num.Obs.` = nrow(model.frame(model.multinomial.unweighted)),
+    check.names = FALSE
+  )
+)
+class(model.multinomial.unweighted.ms) <- "modelsummary_list"
+
+# Ordinal predictor coefficients are odds ratios; thresholds remain on the
+# original logit scale.
+ord_unweighted_tidy <- broom::tidy(model.unweighted) %>%
+  dplyr::mutate(
+    is_threshold = coef.type == "scale",
+    conf.low = estimate - z_95_unweighted * std.error,
+    conf.high = estimate + z_95_unweighted * std.error,
+    p.value = dplyr::if_else(
+      is_threshold,
+      NA_real_,
+      2 * stats::pnorm(abs(statistic), lower.tail = FALSE)
+    ),
+    estimate = dplyr::if_else(is_threshold, estimate, exp(estimate)),
+    conf.low = dplyr::if_else(is_threshold, conf.low, exp(conf.low)),
+    conf.high = dplyr::if_else(is_threshold, conf.high, exp(conf.high))
+  ) %>%
+  dplyr::select(term, estimate, conf.low, conf.high, p.value)
+
+model.ordinal.unweighted.ms <- list(
+  tidy = ord_unweighted_tidy,
+  glance = data.frame(
+    `Num.Obs.` = nrow(model.frame(model.unweighted)),
+    check.names = FALSE
+  )
+)
+class(model.ordinal.unweighted.ms) <- "modelsummary_list"
+
+# Use the same human-readable parameter labels and row order as Table 3.
+mn_unweighted_coef_map <- broom::tidy(model.multinomial.unweighted) %>%
+  dplyr::transmute(
+    term_key = paste0(y.level, ": ", term),
+    term_label = paste0(
+      unname(multinomial_outcome_labels[y.level]),
+      ": ",
+      dplyr::coalesce(unname(coefficient_labels[term]), term)
+    )
+  )
+
+ord_unweighted_coef_map <- broom::tidy(model.unweighted) %>%
+  dplyr::transmute(
+    term_key = term,
+    term_label = dplyr::coalesce(
+      unname(coefficient_labels[term]),
+      term
+    )
+  )
+
+coef_map_unweighted <- c(
+  stats::setNames(
+    mn_unweighted_coef_map$term_label,
+    mn_unweighted_coef_map$term_key
+  ),
+  stats::setNames(
+    ord_unweighted_coef_map$term_label,
+    ord_unweighted_coef_map$term_key
+  )
+)
+
+n_obs_mn_unweighted <- nrow(model.frame(model.multinomial.unweighted))
+n_obs_ord_unweighted <- nrow(model.frame(model.unweighted))
+
+add_gof_unweighted <- data.frame(
+  term = c("Num.Obs.", "Log.Lik.", "AIC", "BIC", "Survey weights"),
+  `Multinomial logit` = c(
+    format(
+      n_obs_mn_unweighted,
+      big.mark = ",",
+      scientific = FALSE,
+      trim = TRUE
+    ),
+    sprintf("%.2f", as.numeric(logLik(model.multinomial.unweighted))),
+    sprintf("%.2f", AIC(model.multinomial.unweighted)),
+    sprintf("%.2f", BIC(model.multinomial.unweighted)),
+    "No (unweighted)"
+  ),
+  `Ordinal logit` = c(
+    format(
+      n_obs_ord_unweighted,
+      big.mark = ",",
+      scientific = FALSE,
+      trim = TRUE
+    ),
+    sprintf("%.2f", as.numeric(logLik(model.unweighted))),
+    sprintf("%.2f", AIC(model.unweighted)),
+    sprintf("%.2f", BIC(model.unweighted)),
+    "No (unweighted)"
+  ),
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+# LaTeX output for the Online Appendix.
+table_1OA_tex <- modelsummary::msummary(
+  list(
+    "Multinomial logit" = model.multinomial.unweighted.ms,
+    "Ordinal logit" = model.ordinal.unweighted.ms
+  ),
+  coef_map = coef_map_unweighted,
+  statistic = "conf.int",
+  stars = TRUE,
+  gof_omit = paste0(
+    "Num\\.Obs\\.|Observations|AIC|BIC|Log\\.Lik|RMSE|F|R2|Adj|",
+    "Within|Between|Std\\.Errors"
+  ),
+  add_rows = add_gof_unweighted,
+  output = "latex_tabular"
+)
+
+writeLines(
+  enc2utf8(as.character(table_1OA_tex)),
+  "build/table_1OA_unweighted.tex",
+  useBytes = TRUE
+)
+
+# Word output: estimates and 95% confidence intervals appear in the same cell
+# so individual parameter rows cannot split across pages.
+format_model_cell_1OA <- function(
+  estimate,
+  conf.low,
+  conf.high,
+  p.value
+) {
+  stars <- dplyr::case_when(
+    is.na(p.value) ~ "",
+    p.value < 0.001 ~ "***",
+    p.value < 0.01 ~ "**",
+    p.value < 0.05 ~ "*",
+    p.value < 0.10 ~ "+",
+    TRUE ~ ""
+  )
+  sprintf(
+    "%.3f%s\n[%.3f, %.3f]",
+    estimate,
+    stars,
+    conf.low,
+    conf.high
+  )
+}
+
+mn_unweighted_word_cells <- mn_unweighted_tidy %>%
+  dplyr::transmute(
+    term_key = term,
+    `Multinomial logit` = format_model_cell_1OA(
+      estimate,
+      conf.low,
+      conf.high,
+      p.value
+    )
+  )
+
+ord_unweighted_word_cells <- ord_unweighted_tidy %>%
+  dplyr::transmute(
+    term_key = term,
+    `Ordinal logit` = format_model_cell_1OA(
+      estimate,
+      conf.low,
+      conf.high,
+      p.value
+    )
+  )
+
+table_1OA_word_data <- data.frame(
+  term_key = names(coef_map_unweighted),
+  Parameter = unname(coef_map_unweighted),
+  stringsAsFactors = FALSE
+) %>%
+  dplyr::left_join(mn_unweighted_word_cells, by = "term_key") %>%
+  dplyr::left_join(ord_unweighted_word_cells, by = "term_key") %>%
+  dplyr::mutate(
+    `Multinomial logit` = dplyr::coalesce(`Multinomial logit`, ""),
+    `Ordinal logit` = dplyr::coalesce(`Ordinal logit`, "")
+  ) %>%
+  dplyr::select(Parameter, `Multinomial logit`, `Ordinal logit`)
+
+table_1OA_word_data <- dplyr::bind_rows(
+  table_1OA_word_data,
+  data.frame(
+    Parameter = add_gof_unweighted$term,
+    `Multinomial logit` = add_gof_unweighted$`Multinomial logit`,
+    `Ordinal logit` = add_gof_unweighted$`Ordinal logit`,
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+)
+
+table_1OA_word <- flextable::flextable(table_1OA_word_data) %>%
+  flextable::theme_booktabs() %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::fontsize(size = 8, part = "all") %>%
+  flextable::bold(part = "header") %>%
+  flextable::align(j = 2:3, align = "center", part = "all") %>%
+  flextable::valign(valign = "center", part = "all") %>%
+  flextable::padding(padding = 2, part = "all") %>%
+  flextable::width(j = 1, width = 6.2) %>%
+  flextable::width(j = 2:3, width = 1.7) %>%
+  flextable::set_table_properties(
+    layout = "fixed",
+    opts_word = list(split = FALSE, repeat_headers = TRUE)
+  )
+
+table_1OA_section <- officer::prop_section(
+  page_size = officer::page_size(orient = "landscape"),
+  page_margins = officer::page_mar(
+    top = 0.5,
+    bottom = 0.5,
+    left = 0.5,
+    right = 0.5
+  )
+)
+
+flextable::save_as_docx(
+  values = list(table_1OA_word),
+  path = "build/table_1OA_unweighted.docx",
+  pr_section = table_1OA_section,
+  align = "center"
+)
 
 
 ## ---- balance_plot
