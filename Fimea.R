@@ -498,6 +498,130 @@ flextable::save_as_docx(
   align = "center"
 )
 
+## ---- table_OA3_probability_contrasts ----
+
+# Table OA3 uses the same weighted multinomial model and covariate profile
+# as the multinomial figure (Figure 3 in the revised manuscript).
+# Keep the predictions object: its joint covariance is needed for differences.
+oa3_predictions <- marginaleffects::predictions(
+  model.multinomial,
+  newdata = multinomial_prediction_grid,
+  conf_level = 0.95
+)
+oa3_probabilities <- as.data.frame(oa3_predictions)
+oa3_prediction_vcov <- stats::vcov(oa3_predictions)
+
+oa3_pairs <- data.frame(
+  comparison = c(
+    "Rescue \u2212 control",
+    "Resource preservation \u2212 control",
+    "Resource preservation \u2212 rescue"
+  ),
+  first = c(
+    "Loss (rescue) frame",
+    "Gains (health maximisation) frame",
+    "Gains (health maximisation) frame"
+  ),
+  second = c("Control", "Control", "Loss (rescue) frame"),
+  stringsAsFactors = FALSE
+)
+oa3_outcomes <- c(
+  "Reject public funding",
+  "Conditional funding (if price is reduced)",
+  "Unconditional public funding",
+  "I don't know"
+)
+
+oa3_rows <- vector("list", nrow(oa3_pairs) * length(oa3_outcomes))
+oa3_row_id <- 0L
+for (oa3_pair_id in seq_len(nrow(oa3_pairs))) {
+  for (oa3_outcome in oa3_outcomes) {
+    oa3_first <- which(
+      oa3_probabilities$Frame == oa3_pairs$first[oa3_pair_id] &
+        as.character(oa3_probabilities$group) == oa3_outcome
+    )
+    oa3_second <- which(
+      oa3_probabilities$Frame == oa3_pairs$second[oa3_pair_id] &
+        as.character(oa3_probabilities$group) == oa3_outcome
+    )
+    stopifnot(length(oa3_first) == 1L, length(oa3_second) == 1L)
+
+    oa3_contrast <- numeric(nrow(oa3_probabilities))
+    oa3_contrast[oa3_first] <- 1
+    oa3_contrast[oa3_second] <- -1
+    oa3_difference <- sum(oa3_contrast * oa3_probabilities$estimate)
+    # Var(P_first - P_second) retains covariance between the predictions.
+    oa3_se <- sqrt(drop(crossprod(
+      oa3_contrast,
+      oa3_prediction_vcov %*% oa3_contrast
+    )))
+
+    oa3_row_id <- oa3_row_id + 1L
+    oa3_rows[[oa3_row_id]] <- data.frame(
+      comparison = oa3_pairs$comparison[oa3_pair_id],
+      outcome = oa3_outcome,
+      estimate_pp = 100 * oa3_difference,
+      std.error_pp = 100 * oa3_se,
+      conf.low_pp = 100 * (oa3_difference - stats::qnorm(0.975) * oa3_se),
+      conf.high_pp = 100 * (oa3_difference + stats::qnorm(0.975) * oa3_se),
+      stringsAsFactors = FALSE
+    )
+  }
+}
+table_oa3_contrasts <- do.call(rbind, oa3_rows)
+rownames(table_oa3_contrasts) <- NULL
+stopifnot(nrow(table_oa3_contrasts) == 12L)
+
+# Match the Word table's row/column order and two-decimal formatting.
+table_oa3_txt <- data.frame(
+  Outcome = c(
+    "Rejection", "Conditional funding", "Unconditional funding",
+    "\u201cI don\u2019t know\u201d"
+  ),
+  check.names = FALSE
+)
+for (oa3_comparison in oa3_pairs$comparison) {
+  oa3_values <- table_oa3_contrasts[
+    table_oa3_contrasts$comparison == oa3_comparison,
+  ]
+  oa3_values <- oa3_values[match(oa3_outcomes, oa3_values$outcome), ]
+  table_oa3_txt[[oa3_comparison]] <- gsub(
+    "-", "\u2212",
+    sprintf(
+      "%.2f [%.2f, %.2f]",
+      oa3_values$estimate_pp,
+      oa3_values$conf.low_pp,
+      oa3_values$conf.high_pp
+    ),
+    fixed = TRUE
+  )
+}
+
+# Save beside Fimea.R, rather than inside build/.
+table_oa3_txt_path <- file.path(
+  "/Users/hectorbahamonde/research/Fimea",
+  "table_OA3_probability_contrasts.txt"
+)
+writeLines(
+  enc2utf8(c(
+    "Table OA3. Differences in predicted probabilities between experimental conditions.",
+    "",
+    paste(names(table_oa3_txt), collapse = "\t"),
+    apply(table_oa3_txt, 1, paste, collapse = "\t"),
+    "",
+    paste(
+      "Note: Percentage-point differences at the Figure 3 covariate profile.",
+      "Brackets contain pointwise 95% confidence intervals from the delta method,",
+      "retaining covariance between conditions. Positive values indicate higher",
+      "probabilities in the first condition."
+    )
+  )),
+  con = table_oa3_txt_path,
+  useBytes = TRUE
+)
+print(table_oa3_txt, row.names = FALSE)
+message("Table OA3 saved to: ", table_oa3_txt_path)
+
 # Sensitivity figure: full-sample multinomial model versus the ordered-logit
 # model that excludes "I don't know" responses. For a like-for-like comparison,
 # multinomial probabilities for the three funding outcomes are conditional on a

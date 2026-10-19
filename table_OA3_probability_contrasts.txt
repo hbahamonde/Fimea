@@ -1,0 +1,9 @@
+Table OA3. Differences in predicted probabilities between experimental conditions.
+
+Outcome	Rescue − control	Resource preservation − control	Resource preservation − rescue
+Rejection	−5.33 [−8.10, −2.55]	−0.91 [−3.69, 1.88]	4.42 [1.82, 7.03]
+Conditional funding	−5.80 [−10.54, −1.07]	4.75 [−0.11, 9.62]	10.56 [5.87, 15.24]
+Unconditional funding	3.72 [−0.90, 8.33]	−10.54 [−15.00, −6.09]	−14.26 [−18.82, −9.70]
+“I don’t know”	7.42 [4.24, 10.59]	6.70 [3.61, 9.78]	−0.72 [−3.73, 2.29]
+
+Note: Percentage-point differences at the Figure 3 covariate profile. Brackets contain pointwise 95% confidence intervals from the delta method, retaining covariance between conditions. Positive values indicate higher probabilities in the first condition.
